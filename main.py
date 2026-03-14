@@ -243,57 +243,7 @@ with tabs[1]:
     st.subheader("Summary Metrics Table")
     st.dataframe(data.describe(), use_container_width=True)
 
-
-# --- NEW TAB: MANAGER PERFORMANCE ---
-with st.expander("Region-wise Manager Performance View"):
-    st.header("Manager Performance by Region")
-    selected_mgr_region = st.selectbox("Select Region for Manager View", df['Region'].unique())
-    mgr_data = df[df['Region'] == selected_mgr_region]
-    mgr_perf = mgr_data.groupby('Sales_Manager_Name')[['Total_Revenue', 'Deals_Closed']].sum().reset_index()
-    st.dataframe(mgr_perf, use_container_width=True)
-    fig_mgr = px.bar(mgr_perf, x='Sales_Manager_Name', y='Total_Revenue', title=f"Revenue by Managers in {selected_mgr_region}")
-    st.plotly_chart(fig_mgr, use_container_width=True, key="mgr_perf_chart")
-
-# 2. DESCRIPTIVE
-with tabs[1]:
-    st.header("Descriptive Analysis")
-
-    # --- Donut Chart: Call Outcomes (Connected vs Not Connected) ---
-    st.subheader("Call Outcomes by Manager")
-    call_outcomes = data.groupby('Sales_Manager_Name')[['Calls_Dialed','Converted']].sum().reset_index()
-    call_outcomes['Not_Connected'] = call_outcomes['Calls_Dialed'] - call_outcomes['Converted']
-
-    outcomes_long = call_outcomes.melt(
-        id_vars=['Sales_Manager_Name'],
-        value_vars=['Converted','Not_Connected'],
-        var_name='Outcome',
-        value_name='Count'
-    )
-
-    fig_donut = px.pie(
-        outcomes_long,
-        values='Count',
-        names='Outcome',
-        color='Outcome',
-        title="Dialed Calls Breakdown (Connected vs Not Connected)",
-        hole=0.4
-    )
-    st.plotly_chart(fig_donut, use_container_width=True, key="desc_donut_chart")
-
-    # --- Grouped Bar Chart: Deals Closed by Region (Manager Level) ---
-    st.subheader("Deals Closed by Manager across Regions")
-    deals_group = data.groupby(['Sales_Manager_Name','Region'])['Deals_Closed'].sum().reset_index()
-    fig_grouped = px.bar(
-        deals_group,
-        x='Sales_Manager_Name',
-        y='Deals_Closed',
-        color='Region',
-        barmode='group',
-        title="Deals Closed by Manager across Regions"
-    )
-    st.plotly_chart(fig_grouped, use_container_width=True, key="desc_grouped_chart")
-
-    # --- Sunburst Chart: Revenue Contribution (stop at Manager level) ---
+        # --- Sunburst Chart: Revenue Contribution (stop at Manager level) ---
     st.subheader("Revenue Contribution Sunburst")
     sunburst_data = data.groupby(['Region','Sales_Manager_Name'])['Total_Revenue'].sum().reset_index()
     fig_sunburst = px.sunburst(
@@ -305,41 +255,18 @@ with tabs[1]:
     )
     st.plotly_chart(fig_sunburst, use_container_width=True, key="desc_sunburst_chart")
 
-    # --- Line Chart: Talk Time Distribution by Manager ---
-    st.subheader("Average Talk Time by Manager")
-    talktime_mgr = data.groupby('Sales_Manager_Name')['Call_Time_Mins'].mean().reset_index()
-    avg_talk = talktime_mgr['Call_Time_Mins'].mean()
-    fig_line = px.line(
-        talktime_mgr,
-        x='Sales_Manager_Name',
-        y='Call_Time_Mins',
-        markers=True,
-        title="Average Talk Time per Manager"
-    )
-    fig_line.add_hline(
-        y=avg_talk,
-        line_dash="dot",
-        line_color="red",
-        annotation_text="Overall Average"
-    )
-    st.plotly_chart(fig_line, use_container_width=True, key="desc_line_chart")
 
-    # --- Bubble Chart: Talk Time vs Revenue ---
-    st.subheader("Talk Time vs Revenue (Bubble Size = Deals Closed)")
-    fig_bubble = px.scatter(
-        data,
-        x='Call_Time_Mins',
-        y='Total_Revenue',
-        size='Deals_Closed',
-        color='Sales_Manager_Name',
-        hover_name='Sales_Manager_Name',
-        title="Talk Time vs Revenue by Manager"
-    )
-    st.plotly_chart(fig_bubble, use_container_width=True, key="desc_bubble_chart")
+# --- NEW TAB: MANAGER PERFORMANCE ---
+with st.expander("Region-wise Manager Performance View"):
+    st.header("Manager Performance by Region")
+    selected_mgr_region = st.selectbox("Select Region for Manager View", df['Region'].unique())
+    mgr_data = df[df['Region'] == selected_mgr_region]
+    mgr_perf = mgr_data.groupby('Sales_Manager_Name')[['Total_Revenue', 'Deals_Closed']].sum().reset_index()
+    st.dataframe(mgr_perf, use_container_width=True)
+    fig_mgr = px.bar(mgr_perf, x='Sales_Manager_Name', y='Total_Revenue', title=f"Revenue by Managers in {selected_mgr_region}")
+    st.plotly_chart(fig_mgr, use_container_width=True, key="mgr_perf_chart")
 
-    # --- Summary Metrics Table ---
-    st.subheader("Summary Metrics Table")
-    st.dataframe(data.describe(), use_container_width=True)
+
 
 # 3. DIAGNOSTIC
 with tabs[2]:
