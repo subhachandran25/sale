@@ -252,12 +252,15 @@ with st.expander("Region-wise Manager Performance View"):
 import plotly.express as px
 import plotly.graph_objects as go
 
+import plotly.express as px
+import plotly.graph_objects as go
+
 # 4. DIAGNOSTIC
 with tabs[2]:
     st.header("Diagnostic Analysis")
 
     # --- Scatter Plot: Dialed Calls vs Talk Time ---
-    st.subheader("Relationship between Dialed Calls and Talk Time")
+    st.subheader("Relationship between Dialed Calls and Talk Time (Scatter)")
     fig_diag_scatter = px.scatter(
         data,
         x='Calls_Dialed',
@@ -267,7 +270,34 @@ with tabs[2]:
         trendline="ols",  # regression line
         title="Dialed Calls vs Talk Time by Region"
     )
-    st.plotly_chart(fig_diag_scatter, use_container_width=True, key="diag_calls_talktime")
+    st.plotly_chart(fig_diag_scatter, use_container_width=True, key="diag_calls_talktime_scatter")
+
+    # --- Combined Column + Line Chart ---
+    st.subheader("Dialed Calls (Line) vs Talk Time (Column)")
+    diag_group = data.groupby('Region')[['Calls_Dialed','Call_Time_Mins']].sum().reset_index()
+
+    fig_combined = go.Figure()
+    # Column chart for Talk Time
+    fig_combined.add_trace(go.Bar(
+        x=diag_group['Region'],
+        y=diag_group['Call_Time_Mins'],
+        name='Talk Time (mins)',
+        marker_color='orange'
+    ))
+    # Line chart for Calls Dialed
+    fig_combined.add_trace(go.Scatter(
+        x=diag_group['Region'],
+        y=diag_group['Calls_Dialed'],
+        mode='lines+markers',
+        name='Calls Dialed',
+        line=dict(color='blue')
+    ))
+    fig_combined.update_layout(
+        title="Dialed Calls vs Talk Time by Region",
+        yaxis_title="Values",
+        barmode='overlay'
+    )
+    st.plotly_chart(fig_combined, use_container_width=True, key="diag_calls_talktime_combined")
 
     # --- Correlation Heatmap ---
     st.subheader("Correlation Matrix (Key Metrics)")
@@ -327,6 +357,7 @@ with tabs[2]:
         'Calls_Dialed','Converted','Deals_Closed','Total_Revenue','Call_Time_Mins'
     ]].sum().reset_index()
     st.dataframe(diag_summary, use_container_width=True)
+
         
 
 # 4. PERSPECTIVE
