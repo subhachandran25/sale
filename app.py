@@ -194,7 +194,7 @@ with tabs[4]:
     
     # 2. Radar Chart (Multi-metric comparison)
     st.subheader("Multi-Metric Radar Analysis")
-    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique(), key="radar_persp")
+    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique(), key="radar_persp_unique_2")
     rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0]
     fig_radar = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                               theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
