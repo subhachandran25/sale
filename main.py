@@ -28,6 +28,7 @@ tabs = st.tabs(["🏠 Home", "📊 Descriptive", "🔍 Diagnostic", "🎯 Perspe
 
 # 1. HOME PAGE
 # 1. HOME PAGE
+# 1. HOME PAGE
 with tabs[0]:
     st.title("Executive Summary")
     c1, c2, c3, c4, c5 = st.columns(5)
@@ -39,7 +40,7 @@ with tabs[0]:
     
     col1, col2 = st.columns(2)
 
-    # --- NEW MANAGER PERFORMANCE CHART ---
+    # --- MANAGER PERFORMANCE CHART: Connected Calls vs Deals Closed ---
     mgr_perf_home = data.groupby('Sales_Manager_Name')[['Converted','Deals_Closed']].sum().reset_index()
     fig_mgr_bar = px.bar(
         mgr_perf_home, 
@@ -50,9 +51,13 @@ with tabs[0]:
     )
     col1.plotly_chart(fig_mgr_bar, use_container_width=True, key="home_mgr_bar_chart")
 
-    # Keep histogram for talk time distribution
-    fig_hist_home = px.histogram(data, x='Call_Time_Mins', title="Talk Time Distribution")
-    col2.plotly_chart(fig_hist_home, use_container_width=True, key="home_hist_chart")
+    # --- LINE CHART: Revenue by Manager with Average Benchmark ---
+    mgr_rev = data.groupby('Sales_Manager_Name')['Total_Revenue'].sum().reset_index()
+    avg_rev = mgr_rev['Total_Revenue'].mean()
+    fig_line = px.line(mgr_rev, x='Sales_Manager_Name', y='Total_Revenue', 
+                       markers=True, title="Revenue by Manager with Team Average")
+    fig_line.add_hline(y=avg_rev, line_dash="dot", line_color="red", annotation_text="Average Revenue")
+    col2.plotly_chart(fig_line, use_container_width=True, key="home_mgr_line_chart")
 
     # --- PIE CHART: Revenue by Region ---
     st.subheader("Revenue Performance by Region")
