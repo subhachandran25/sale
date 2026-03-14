@@ -126,6 +126,47 @@ with tabs[1]:
 # 4. PERSPECTIVE
 with tabs[3]:
     st.header("Perspective & Benchmarks")
+
+    
+    # 1. Benchmark Line Chart (Rep vs Team Average)
+    st.subheader("Benchmark: Rep Performance vs Team Average")
+    avg_rev = data['Total_Revenue'].mean()
+    fig_bench = px.bar(data, x='Sales_Rep_Name', y='Total_Revenue', title="Revenue per Rep vs Team Average")
+    fig_bench.add_hline(y=avg_rev, line_dash="dash", line_color="red", annotation_text="Team Average")
+    st.plotly_chart(fig_bench, use_container_width=True)
+    
+    # 2. Radar Chart (Multi-metric comparison)
+    st.subheader("Multi-Metric Radar Analysis")
+    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique(), key="radar_persp")
+    rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0]
+    fig_radar = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
+                              theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
+    fig_radar.update_traces(fill='toself')
+    st.plotly_chart(fig_radar, use_container_width=True)
+    
+    # 3. Waterfall Chart (Revenue Contribution)
+    st.subheader("Revenue Contribution Waterfall")
+    fig_water = go.Figure(go.Waterfall(
+        name="Revenue", orientation="v",
+        measure=["relative", "relative", "relative", "total"],
+        x=["New Leads", "Qualified", "Converted", "Total Revenue"],
+        y=[0, data['Qualified'].sum(), data['Converted'].sum(), data['Total_Revenue'].sum()],
+        connector={"line": {"color": "rgb(63, 63, 63)"}},
+    ))
+    st.plotly_chart(fig_water, use_container_width=True)
+    
+    # 4. Cohort Chart (Group by Region/Manager)
+    st.subheader("Cohort Analysis: Revenue by Region")
+    cohort_data = data.groupby('Region')['Total_Revenue'].sum().reset_index()
+    fig_cohort = px.bar(cohort_data, x='Region', y='Total_Revenue', color='Region', title="Revenue by Region Cohort")
+    st.plotly_chart(fig_cohort, use_container_width=True)
+    
+    # 5. Stacked Area Chart (Cumulative Revenue)
+    st.subheader("Cumulative Revenue Contribution")
+    # Sorting by revenue to make the area chart look clean
+    area_data = data.sort_values('Total_Revenue').reset_index()
+    fig_area = px.area(area_data, x=area_data.index, y='Total_Revenue', color='Region', title="Cumulative Revenue by Region")
+    st.plotly_chart(fig_area, use_container_width=True)
     rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique(), key="radar_rep")
     rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0]
     fig = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
