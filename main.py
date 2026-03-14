@@ -261,19 +261,6 @@ with tabs[4]:
     )
     st.plotly_chart(fig_reg, use_container_width=True, key="pred_regression_scatter")
 
-    # --- Decision Tree Visualization: Drivers of Closures/Revenue ---
-    st.subheader("Decision Tree: Drivers of Closures/Revenue")
-    from sklearn.tree import DecisionTreeRegressor, plot_tree
-    import matplotlib.pyplot as plt
-
-    X = data[['Calls_Dialed','Converted','Call_Time_Mins']]
-    y = data['Deals_Closed']   # numeric target
-    reg = DecisionTreeRegressor(max_depth=3).fit(X, y)
-
-    fig_dt, ax = plt.subplots(figsize=(10,6))
-    plot_tree(reg, feature_names=X.columns, filled=True, ax=ax)  # no class_names
-    st.pyplot(fig_dt, key="pred_decision_tree")
-
     # --- Forecast Funnel Chart: Expected Conversion Rates ---
     st.subheader("Forecast Funnel")
     funnel_df = pd.DataFrame({
