@@ -78,8 +78,6 @@ with st.expander("Region-wise Manager Performance View"):
     fig_mgr = px.bar(mgr_perf, x='Sales_Manager_Name', y='Total_Revenue', title=f"Revenue by Managers in {selected_mgr_region}")
     st.plotly_chart(fig_mgr, use_container_width=True, key="mgr_perf_chart")
 
-
-
 # 2. DESCRIPTIVE
 with tabs[1]:
     st.header("Descriptive Analysis")
@@ -131,18 +129,24 @@ with tabs[1]:
     )
     st.plotly_chart(fig_sunburst, use_container_width=True, key="desc_sunburst_chart")
 
-    # --- Violin Plot: Talk Time Distribution by Manager ---
-    st.subheader("Talk Time Distribution by Manager")
-    fig_violin = px.violin(
-        data,
+    # --- Line Chart: Talk Time Distribution by Manager ---
+    st.subheader("Average Talk Time by Manager")
+    talktime_mgr = data.groupby('Sales_Manager_Name')['Call_Time_Mins'].mean().reset_index()
+    avg_talk = talktime_mgr['Call_Time_Mins'].mean()
+    fig_line = px.line(
+        talktime_mgr,
         x='Sales_Manager_Name',
         y='Call_Time_Mins',
-        box=True,
-        points="all",
-        color='Sales_Manager_Name',
-        title="Talk Time Spread and Density by Manager"
+        markers=True,
+        title="Average Talk Time per Manager"
     )
-    st.plotly_chart(fig_violin, use_container_width=True, key="desc_violin_chart")
+    fig_line.add_hline(
+        y=avg_talk,
+        line_dash="dot",
+        line_color="red",
+        annotation_text="Overall Average"
+    )
+    st.plotly_chart(fig_line, use_container_width=True, key="desc_line_chart")
 
     # --- Bubble Chart: Talk Time vs Revenue ---
     st.subheader("Talk Time vs Revenue (Bubble Size = Deals Closed)")
@@ -160,7 +164,6 @@ with tabs[1]:
     # --- Summary Metrics Table ---
     st.subheader("Summary Metrics Table")
     st.dataframe(data.describe(), use_container_width=True)
-
 
 # 3. DIAGNOSTIC
 with tabs[2]:
