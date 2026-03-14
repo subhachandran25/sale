@@ -38,6 +38,20 @@ with tabs[0]:
     col1.plotly_chart(px.bar(data, x='Sales_Rep_Name', y=['Calls_Dialed', 'Converted'], title="Dialed vs Converted"), use_container_width=True)
     col2.plotly_chart(px.histogram(data, x='Call_Time_Mins', title="Talk Time Distribution"), use_container_width=True)
 
+# --- NEW TAB: MANAGER PERFORMANCE ---
+with st.expander("Region-wise Manager Performance View"):
+    st.header("Manager Performance by Region")
+    
+    # Filter for specific region
+    selected_mgr_region = st.selectbox("Select Region for Manager View", df['Region'].unique(), key="mgr_view_reg")
+    mgr_data = df[df['Region'] == selected_mgr_region]
+    
+    # Group by Manager
+    mgr_perf = mgr_data.groupby('Sales_Manager_Name')[['Total_Revenue', 'Deals_Closed']].sum().reset_index()
+    
+    st.dataframe(mgr_perf, use_container_width=True)
+    st.plotly_chart(px.bar(mgr_perf, x='Sales_Manager_Name', y='Total_Revenue', title=f"Revenue by Managers in {selected_mgr_region}"), use_container_width=True)
+
 # 2. DESCRIPTIVE
 with tabs[1]:
     st.header("Descriptive Analysis")
