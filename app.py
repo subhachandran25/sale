@@ -55,11 +55,40 @@ with st.expander("Region-wise Manager Performance View"):
 # 2. DESCRIPTIVE
 with tabs[1]:
     st.header("Descriptive Analysis")
+    
+    # Row 1: Call Efficiency & Talk Time
     col1, col2 = st.columns(2)
-    col1.plotly_chart(px.pie(data, names='Sales_Rep_Name', values='Total_Revenue', title="Revenue Share by Rep"), use_container_width=True)
-    # Using a bar chart for trend since we don't have a Date column
-    col2.plotly_chart(px.bar(data.groupby('Sales_Rep_Name')['Total_Revenue'].sum().reset_index(), x='Sales_Rep_Name', y='Total_Revenue', title="Revenue per Rep"), use_container_width=True)
-
+    
+    # 1. Bar Chart: Dialed vs Connected Calls (Efficiency)
+    # We use 'barmode="group"' to compare the two side-by-side
+    fig_eff = px.bar(data, x='Sales_Rep_Name', y=['Calls_Dialed', 'Converted'], 
+                     title="Call Efficiency: Dialed vs Converted Calls",
+                     barmode='group')
+    col1.plotly_chart(fig_eff, use_container_width=True)
+    
+    # 2. Histogram: Talk Time Distribution
+    fig_hist = px.histogram(data, x='Call_Time_Mins', nbins=20, 
+                            title="Talk Time Distribution (Outlier Detection)",
+                            color_discrete_sequence=['#636EFA'])
+    col2.plotly_chart(fig_hist, use_container_width=True)
+    
+    # Row 2: Conversion Funnel
+    st.subheader("Conversion Funnel")
+    
+    # 3. Conversion Funnel: Dialed -> Qualified -> Converted -> Deals Closed
+    # We create a temporary dataframe for the funnel stages
+    funnel_df = pd.DataFrame({
+        "Stage": ["Dialed", "Qualified", "Converted", "Deals Closed"],
+        "Count": [data['Calls_Dialed'].sum(), data['Qualified'].sum(), 
+                  data['Converted'].sum(), data['Deals_Closed'].sum()]
+    })
+    
+    fig_funnel = px.funnel(funnel_df, x='Count', y='Stage', title="Sales Conversion Funnel")
+    st.plotly_chart(fig_funnel, use_container_width=True)
+    
+    # KPI Table
+    st.subheader("Summary Metrics Table")
+    st.dataframe(data.describe(), use_container_width=True)
 # 3. DIAGNOSTIC
 with tabs[2]:
     st.header("Diagnostic Analysis")
