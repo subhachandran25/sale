@@ -84,7 +84,11 @@ with tabs[1]:
     })
     
     fig_funnel = px.funnel(funnel_df, x='Count', y='Stage', title="Sales Conversion Funnel")
-    st.plotly_chart(fig_funnel, use_container_width=True,key="home_1")
+    # Change this:
+st.plotly_chart(fig_funnel, use_container_width=True, key="home_1")
+
+# To this (a unique key):
+st.plotly_chart(fig_funnel, use_container_width=True, key="funnel_chart_home")
     
     # KPI Table
     st.subheader("Summary Metrics Table")
