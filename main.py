@@ -267,11 +267,11 @@ with tabs[4]:
     import matplotlib.pyplot as plt
 
     X = data[['Calls_Dialed','Converted','Call_Time_Mins']]
-    y = data['Deals_Closed']
+    y = data['Deals_Closed']   # numeric target
     reg = DecisionTreeRegressor(max_depth=3).fit(X, y)
 
     fig_dt, ax = plt.subplots(figsize=(10,6))
-    plot_tree(reg, feature_names=X.columns, filled=True, ax=ax)
+    plot_tree(reg, feature_names=X.columns, filled=True, ax=ax)  # no class_names
     st.pyplot(fig_dt, key="pred_decision_tree")
 
     # --- Forecast Funnel Chart: Expected Conversion Rates ---
@@ -304,6 +304,10 @@ with tabs[4]:
     })
     fig_sim = px.bar(sim_df, x='Scenario', y='Revenue', title="What-if Revenue Simulation")
     st.plotly_chart(fig_sim, use_container_width=True, key="pred_simulation_chart")
+
+    projected_rev = base_rev * (1 + (inc_calls + inc_talk)/200)
+    st.metric("Projected Combined Revenue", f"₹{projected_rev:,.0f}")
+
 
     projected_rev = base_rev * (1 + (inc_calls + inc_talk)/200)
     st.metric("Projected Combined Revenue", f"₹{projected_rev:,.0f}")
