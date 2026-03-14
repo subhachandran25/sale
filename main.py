@@ -23,31 +23,31 @@ if selected_region != 'All':
 
 # --- TABS ---
 tabs = st.tabs(["🏠 Home", "📊 Descriptive", "🔍 Diagnostic", "🎯 Perspective", "🔮 Predictive"])
-# 1. HOME
-with tabs[0]:
-    st.header("Home Dashboard")
+# 2. DESCRIPTIVE
+with tabs[1]:
+    st.header("Descriptive Analysis")
 
-    # --- Summary Metrics ---
-    st.subheader("Key Metrics Overview")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total Calls Dialed", f"{data['Calls_Dialed'].sum():,}")
-    col2.metric("Total Deals Closed", f"{data['Deals_Closed'].sum():,}")
-    col3.metric("Total Revenue", f"₹{data['Total_Revenue'].sum():,}")
-    col4.metric("Average Talk Time (mins)", f"{data['Call_Time_Mins'].mean():.1f}")
-
-    # --- Call Outcomes: Connected vs Dialed ---
-    st.subheader("Call Outcomes Comparison")
+    # --- Donut Chart: Call Outcomes (Connected vs Not Connected) ---
+    st.subheader("Call Outcomes by Manager")
     call_outcomes = data.groupby('Sales_Manager_Name')[['Calls_Dialed','Converted']].sum().reset_index()
-    fig_outcomes = px.bar(
-        call_outcomes,
-        x='Sales_Manager_Name',
-        y=['Calls_Dialed','Converted'],
-        barmode='group',
-        title="Connected Calls vs Dialed Calls by Manager"
+    call_outcomes['Not_Connected'] = call_outcomes['Calls_Dialed'] - call_outcomes['Converted']
+    outcomes_long = call_outcomes.melt(
+        id_vars=['Sales_Manager_Name'],
+        value_vars=['Converted','Not_Connected'],
+        var_name='Outcome',
+        value_name='Count'
     )
-    st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_chart")
+    fig_donut = px.pie(
+        outcomes_long,
+        values='Count',
+        names='Outcome',
+        color='Outcome',
+        title="Dialed Calls Breakdown (Connected vs Not Connected)",
+        hole=0.4
+    )
+    st.plotly_chart(fig_donut, use_container_width=True, key="desc_donut_chart")
 
-    # --- Deals Closed by Region ---
+    # --- Grouped Bar Chart: Deals Closed by Region ---
     st.subheader("Deals Closed by Manager across Regions")
     deals_group = data.groupby(['Sales_Manager_Name','Region'])['Deals_Closed'].sum().reset_index()
     fig_grouped = px.bar(
@@ -58,9 +58,9 @@ with tabs[0]:
         barmode='group',
         title="Deals Closed by Manager across Regions"
     )
-    st.plotly_chart(fig_grouped, use_container_width=True, key="home_grouped_chart")
+    st.plotly_chart(fig_grouped, use_container_width=True, key="desc_grouped_chart")
 
-    # --- Revenue Contribution: Stacked Bar (better than Sunburst) ---
+    # --- Revenue Contribution: Region → Manager ---
     st.subheader("Revenue Contribution by Region and Manager")
     revenue_group = data.groupby(['Region','Sales_Manager_Name'])['Total_Revenue'].sum().reset_index()
     fig_revenue = px.bar(
@@ -71,7 +71,7 @@ with tabs[0]:
         barmode='stack',
         title="Revenue Contribution by Manager across Regions"
     )
-    st.plotly_chart(fig_revenue, use_container_width=True, key="home_revenue_chart")
+    st.plotly_chart(fig_revenue, use_container_width=True, key="desc_revenue_chart")
 
     # --- Line Chart: Talk Time Distribution by Manager ---
     st.subheader("Average Talk Time by Manager")
@@ -90,7 +90,7 @@ with tabs[0]:
         line_color="red",
         annotation_text="Overall Average"
     )
-    st.plotly_chart(fig_line, use_container_width=True, key="home_line_chart")
+    st.plotly_chart(fig_line, use_container_width=True, key="desc_line_chart")
 
     # --- Bubble Chart: Talk Time vs Revenue ---
     st.subheader("Talk Time vs Revenue (Bubble Size = Deals Closed)")
@@ -103,38 +103,30 @@ with tabs[0]:
         hover_name='Sales_Manager_Name',
         title="Talk Time vs Revenue by Manager"
     )
-    st.plotly_chart(fig_bubble, use_container_width=True, key="home_bubble_chart")
+    st.plotly_chart(fig_bubble, use_container_width=True, key="desc_bubble_chart")
 
-    # --- Lead Buckets Pie Chart across Regions ---
-    st.subheader("Lead Buckets Distribution")
-    lead_buckets = data.groupby('Region')[['New_Leads','Followup_Leads','Qualified','Disqualified']].sum().reset_index()
-    lead_long = lead_buckets.melt(
+    # --- Lead Funnel Chart across Regions ---
+    st.subheader("Lead Funnel by Region")
+    funnel_data = data.groupby('Region')[['New_Leads','Followup_Leads','Qualified','Disqualified']].sum().reset_index()
+    funnel_long = funnel_data.melt(
         id_vars=['Region'],
         value_vars=['New_Leads','Followup_Leads','Qualified','Disqualified'],
-        var_name='Lead_Type',
+        var_name='Stage',
         value_name='Count'
     )
-    fig_lead_pie = px.pie(
-        lead_long,
-        values='Count',
-        names='Lead_Type',
-        color='Lead_Type',
-        title="Overall Lead Buckets Distribution (All Regions)",
-        hole=0.3
+    fig_funnel = px.funnel(
+        funnel_long,
+        x='Count',
+        y='Stage',
+        color='Region',
+        title="Lead Funnel across Regions"
     )
-    st.plotly_chart(fig_lead_pie, use_container_width=True, key="home_lead_pie")
+    st.plotly_chart(fig_funnel, use_container_width=True, key="desc_lead_funnel")
 
-    # --- Stacked Bar Chart: Lead Buckets by Region ---
-    st.subheader("Lead Buckets by Region")
-    fig_lead_bar = px.bar(
-        lead_long,
-        x='Region',
-        y='Count',
-        color='Lead_Type',
-        barmode='stack',
-        title="Lead Buckets Composition by Region"
-    )
-    st.plotly_chart(fig_lead_bar, use_container_width=True, key="home_lead_bar")
+    # --- Summary Metrics Table ---
+    st.subheader("Summary Metrics Table")
+    st.dataframe(data.describe(), use_container_width=True)
+
 
 # --- NEW TAB: MANAGER PERFORMANCE ---
 with st.expander("Region-wise Manager Performance View"):
