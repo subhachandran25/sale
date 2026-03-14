@@ -229,53 +229,79 @@ with tabs[3]:
     st.plotly_chart(fig_area, use_container_width=True, key="persp_area_chart")
 
 # 5. PREDICTIVE
+# 5. PREDICTIVE
 with tabs[4]:
     st.header("Predictive Analysis")
 
-    st.subheader("Benchmark: Rep Performance vs Team Average")
-    avg_rev = data['Total_Revenue'].mean()
-    fig_bench_pred = px.bar(data, x='Sales_Rep_Name', y='Total_Revenue', title="Revenue per Rep vs Team Average")
-    fig_bench_pred.add_hline(y=avg_rev, line_dash="dash", line_color="red", annotation_text="Team Average")
-    st.plotly_chart(fig_bench_pred, use_container_width=True, key="pred_bench_chart")
-
-    st.subheader("Multi-Metric Radar Analysis")
-    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique(), key="radar_pred_selectbox")
-    rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0]   # ✅ fixed bracket
-    fig_radar_pred = px.line_polar(
-        r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
-        theta=['Calls', 'TalkTime', 'Deals'], line_close=True
+    # --- Forecast Line Chart: Revenue Projection ---
+    st.subheader("Revenue Forecast")
+    # Assume you have a 'Date' column in your dataset
+    revenue_ts = data.groupby('Date')['Total_Revenue'].sum().reset_index()
+    fig_forecast = px.line(
+        revenue_ts,
+        x='Date',
+        y='Total_Revenue',
+        markers=True,
+        title="Time Series Revenue Projection"
     )
-    fig_radar_pred.update_traces(fill='toself')
-    st.plotly_chart(fig_radar_pred, use_container_width=True, key="pred_radar_chart")
+    st.plotly_chart(fig_forecast, use_container_width=True, key="pred_forecast_line")
 
-    st.subheader("Revenue Contribution Waterfall")
-    fig_water_pred = go.Figure(go.Waterfall(
-        name="Revenue", orientation="v",
-        measure=["relative", "relative", "relative", "total"],
-        x=["New Leads", "Qualified", "Converted", "Total Revenue"],
-        y=[0, data['Qualified'].sum(), data['Converted'].sum(), data['Total_Revenue'].sum()],
-        connector={"line": {"color": "rgb(63, 63, 63)"}},
-    ))
-    st.plotly_chart(fig_water_pred, use_container_width=True, key="pred_waterfall_chart")
+    # --- Regression Scatter Plot: Closures vs Talk Time & Connected Calls ---
+    st.subheader("Regression Analysis: Closures vs Talk Time & Connected Calls")
+    fig_reg = px.scatter(
+        data,
+        x='Call_Time_Mins',
+        y='Deals_Closed',
+        size='Converted',
+        color='Sales_Manager_Name',
+        hover_name='Sales_Manager_Name',
+        trendline="ols",
+        title="Predicting Closures from Talk Time & Connected Calls"
+    )
+    st.plotly_chart(fig_reg, use_container_width=True, key="pred_regression_scatter")
 
-    st.subheader("Cohort Analysis: Revenue by Region")
-    cohort_data_pred = data.groupby('Region')['Total_Revenue'].sum().reset_index()
-    fig_cohort_pred = px.bar(cohort_data_pred, x='Region', y='Total_Revenue', color='Region', title="Revenue by Region Cohort")
-    st.plotly_chart(fig_cohort_pred, use_container_width=True, key="pred_cohort_chart")
+    # --- Decision Tree Visualization: Drivers of Closures/Revenue ---
+    st.subheader("Decision Tree: Drivers of Closures/Revenue")
+    from sklearn.tree import DecisionTreeClassifier, plot_tree
+    import matplotlib.pyplot as plt
 
-    st.subheader("Cumulative Revenue Contribution")
-    area_data_pred = data.sort_values('Total_Revenue').reset_index()
-    fig_area_pred = px.area(area_data_pred, x=area_data_pred.index, y='Total_Revenue', color='Region', title="Cumulative Revenue by Region")
-    st.plotly_chart(fig_area_pred, use_container_width=True, key="pred_area_chart")
+    X = data[['Calls_Dialed','Converted','Call_Time_Mins']]
+    y = data['Deals_Closed']
+    clf = DecisionTreeClassifier(max_depth=3).fit(X, y)
 
-    # Predictive model
-    X = data[['Calls_Dialed', 'Call_Time_Mins', 'Converted']]
-    y = data['Total_Revenue']
-    model = DecisionTreeRegressor().fit(X, y)
+    fig_dt, ax = plt.subplots(figsize=(10,6))
+    plot_tree(clf, feature_names=X.columns, class_names=['No Deal','Deal'], filled=True, ax=ax)
+    st.pyplot(fig_dt, key="pred_decision_tree")
 
-    fig_reg = px.scatter(data, x='Call_Time_Mins', y='Total_Revenue', trendline="ols", title="Revenue vs Talk Time")
-    st.plotly_chart(fig_reg, use_container_width=True, key="pred_reg_chart")
+    # --- Forecast Funnel Chart: Expected Conversion Rates ---
+    st.subheader("Forecast Funnel")
+    funnel_df = pd.DataFrame({
+        "Stage": ["Dialed", "Qualified", "Converted", "Deals Closed"],
+        "Expected": [
+            data['Calls_Dialed'].sum() * 1.1,   # assume 10% growth
+            data['Qualified'].sum() * 1.1,
+            data['Converted'].sum() * 1.1,
+            data['Deals_Closed'].sum() * 1.1
+        ]
+    })
+    fig_funnel = px.funnel(funnel_df, x='Expected', y='Stage', title="Expected Conversion Funnel")
+    st.plotly_chart(fig_funnel, use_container_width=True, key="pred_forecast_funnel")
 
-    inc = st.slider("Increase Dialed Calls by %", 0, 50, 10, key="sim_slider")
-    st.metric("Projected Revenue Lift", f"₹{(data['Total_Revenue'].sum() * (inc/100)):,.0f}")
+    # --- Scenario Simulation Chart: What-if Analysis ---
+    st.subheader("Scenario Simulation: Impact of More Calls/Talk Time")
+    inc_calls = st.slider("Increase Dialed Calls by %", 0, 50, 10, key="sim_calls_slider")
+    inc_talk = st.slider("Increase Talk Time by %", 0, 50, 10, key="sim_talk_slider")
 
+    projected_rev = data['Total_Revenue'].sum() * (1 + (inc_calls + inc_talk)/200)
+    sim_df = pd.DataFrame({
+        "Scenario": ["Base Revenue","With More Calls","With More Talk Time"],
+        "Revenue": [
+            data['Total_Revenue'].sum(),
+            data['Total_Revenue'].sum() * (1 + inc_calls/100),
+            data['Total_Revenue'].sum() * (1 + inc_talk/100)
+        ]
+    })
+    fig_sim = px.bar(sim_df, x='Scenario', y='Revenue', title="What-if Revenue Simulation")
+    st.plotly_chart(fig_sim, use_container_width=True, key="pred_simulation_chart")
+
+    st.metric("Projected Combined Revenue", f"₹{projected_rev:,.0f}")
