@@ -174,7 +174,7 @@ with tabs[3]:
     area_data = data.sort_values('Total_Revenue').reset_index()
     fig_area = px.area(area_data, x=area_data.index, y='Total_Revenue', color='Region', title="Cumulative Revenue by Region")
     st.plotly_chart(fig_area, use_container_width=True)
-    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique())
+    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique(), key="radar_persp_selectbox")
     rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0]
     fig = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                         theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
