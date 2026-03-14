@@ -250,32 +250,86 @@ with st.expander("Region-wise Manager Performance View"):
     st.plotly_chart(fig_mgr, use_container_width=True, key="mgr_perf_chart")
 
 
+import plotly.express as px
+import plotly.graph_objects as go
 
-# 3. DIAGNOSTIC
-with tabs[2]:
+# 4. DIAGNOSTIC
+with tabs[3]:
     st.header("Diagnostic Analysis")
-    numeric_cols = ['Total_Revenue', 'Calls_Dialed', 'Converted', 'Deals_Closed', 'Call_Time_Mins']
-    for col in numeric_cols:
-        if col in data.columns:
-            data[col] = pd.to_numeric(data[col], errors='coerce').fillna(0)
 
-    st.write(f"Rows in current view: {len(data)}")
-    if len(data) == 0:
-        st.error("No data found for this selection. Check your filters.")
-    else:
-        st.subheader("Pareto: Revenue Contribution")
-        pareto_data = data.groupby('Sales_Rep_Name')['Total_Revenue'].sum().sort_values(ascending=False).reset_index()
-        fig_pareto = px.bar(pareto_data, x='Sales_Rep_Name', y='Total_Revenue')
-        st.plotly_chart(fig_pareto, use_container_width=True, key="desc_pareto_chart")
+    # --- Scatter Plot: Dialed Calls vs Talk Time ---
+    st.subheader("Relationship between Dialed Calls and Talk Time")
+    fig_diag_scatter = px.scatter(
+        data,
+        x='Calls_Dialed',
+        y='Call_Time_Mins',
+        color='Region',
+        hover_name='Senior_Manager_Name',
+        trendline="ols",  # regression line
+        title="Dialed Calls vs Talk Time by Region"
+    )
+    st.plotly_chart(fig_diag_scatter, use_container_width=True, key="diag_calls_talktime")
 
-        st.subheader("Talk Time Outliers")
-        fig_box = px.box(data, y='Call_Time_Mins')
-        st.plotly_chart(fig_box, use_container_width=True, key="desc_box_chart")
+    # --- Correlation Heatmap ---
+    st.subheader("Correlation Matrix (Key Metrics)")
+    corr = data[['Calls_Dialed','Call_Time_Mins','Converted','Deals_Closed','Total_Revenue']].corr()
+    fig_corr = px.imshow(
+        corr,
+        text_auto=True,
+        color_continuous_scale="RdBu_r",
+        title="Correlation Heatmap of Key Metrics"
+    )
+    st.plotly_chart(fig_corr, use_container_width=True, key="diag_corr_heatmap")
 
-        st.subheader("Call Efficiency")
-        df_melted = data.melt(id_vars=['Sales_Rep_Name'], value_vars=['Calls_Dialed', 'Converted'])
-        fig_stacked = px.bar(df_melted, x='Sales_Rep_Name', y='value', color='variable', barmode='stack')
-        st.plotly_chart(fig_stacked, use_container_width=True, key="home_stacked_chart")
+    # --- Diagnostic Bar Chart: Conversion Efficiency ---
+    st.subheader("Conversion Efficiency by Senior Manager")
+    efficiency = data.groupby('Senior_Manager_Name').agg({
+        'Calls_Dialed':'sum',
+        'Converted':'sum',
+        'Deals_Closed':'sum'
+    }).reset_index()
+    efficiency['Conversion_Rate'] = (efficiency['Converted'] / efficiency['Calls_Dialed']).round(2)
+    efficiency['Deal_Close_Rate'] = (efficiency['Deals_Closed'] / efficiency['Converted']).round(2)
+
+    fig_eff = px.bar(
+        efficiency,
+        x='Senior_Manager_Name',
+        y=['Conversion_Rate','Deal_Close_Rate'],
+        barmode='group',
+        title="Conversion & Deal Close Rates by Senior Manager"
+    )
+    st.plotly_chart(fig_eff, use_container_width=True, key="diag_conversion_rates")
+
+    # --- Diagnostic Line Chart: Revenue vs Calls ---
+    st.subheader("Revenue vs Calls Dialed by Region")
+    rev_calls = data.groupby('Region')[['Calls_Dialed','Total_Revenue']].sum().reset_index()
+
+    fig_rev_calls = go.Figure()
+    fig_rev_calls.add_trace(go.Scatter(
+        x=rev_calls['Region'],
+        y=rev_calls['Calls_Dialed'],
+        mode='lines+markers',
+        name='Calls Dialed',
+        line=dict(color='green')
+    ))
+    fig_rev_calls.add_trace(go.Scatter(
+        x=rev_calls['Region'],
+        y=rev_calls['Total_Revenue'],
+        mode='lines+markers',
+        name='Total Revenue',
+        line=dict(color='blue')
+    ))
+    fig_rev_calls.update_layout(title="Revenue vs Calls Dialed across Regions")
+    st.plotly_chart(fig_rev_calls, use_container_width=True, key="diag_rev_calls")
+
+    # --- Diagnostic Summary Table ---
+    st.subheader("Diagnostic Summary Table")
+    diag_summary = data.groupby('Senior_Manager_Name')[[
+        'Calls_Dialed','Converted','Deals_Closed','Total_Revenue','Call_Time_Mins'
+    ]].sum().reset_index()
+    st.dataframe(diag_summary, use_container_width=True)
+
+        
 
 # 4. PERSPECTIVE
 with tabs[3]:
