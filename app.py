@@ -91,7 +91,7 @@ with tabs[1]:
     st.dataframe(data.describe(), use_container_width=True)
 # 3. DIAGNOSTIC
 with tabs[1]:
-    st.header("Descriptive Analysis")
+    st.header("Diagnostic Analysis")
     
     # DEBUG: Check if data is empty
     if data.empty:
