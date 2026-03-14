@@ -229,20 +229,21 @@ with tabs[3]:
     st.plotly_chart(fig_area, use_container_width=True, key="persp_area_chart")
 
 # 5. PREDICTIVE
-# 5. PREDICTIVE
 with tabs[4]:
     st.header("Predictive Analysis")
 
     # --- Forecast Line Chart: Revenue Projection ---
     st.subheader("Revenue Forecast")
-    # Assume you have a 'Date' column in your dataset
-    revenue_ts = data.groupby('Date')['Total_Revenue'].sum().reset_index()
+    # If no Date column, simulate sequential periods
+    revenue_ts = data.groupby('Sales_Manager_Name')['Total_Revenue'].sum().reset_index()
+    revenue_ts['Period'] = range(1, len(revenue_ts)+1)
+
     fig_forecast = px.line(
         revenue_ts,
-        x='Date',
+        x='Period',
         y='Total_Revenue',
         markers=True,
-        title="Time Series Revenue Projection"
+        title="Revenue Projection by Manager (Synthetic Periods)"
     )
     st.plotly_chart(fig_forecast, use_container_width=True, key="pred_forecast_line")
 
@@ -292,15 +293,21 @@ with tabs[4]:
     inc_calls = st.slider("Increase Dialed Calls by %", 0, 50, 10, key="sim_calls_slider")
     inc_talk = st.slider("Increase Talk Time by %", 0, 50, 10, key="sim_talk_slider")
 
-    projected_rev = data['Total_Revenue'].sum() * (1 + (inc_calls + inc_talk)/200)
+    base_rev = data['Total_Revenue'].sum()
     sim_df = pd.DataFrame({
         "Scenario": ["Base Revenue","With More Calls","With More Talk Time"],
         "Revenue": [
-            data['Total_Revenue'].sum(),
-            data['Total_Revenue'].sum() * (1 + inc_calls/100),
-            data['Total_Revenue'].sum() * (1 + inc_talk/100)
+            base_rev,
+            base_rev * (1 + inc_calls/100),
+            base_rev * (1 + inc_talk/100)
         ]
     })
+    fig_sim = px.bar(sim_df, x='Scenario', y='Revenue', title="What-if Revenue Simulation")
+    st.plotly_chart(fig_sim, use_container_width=True, key="pred_simulation_chart")
+
+    projected_rev = base_rev * (1 + (inc_calls + inc_talk)/200)
+    st.metric("Projected Combined Revenue", f"₹{projected_rev:,.0f}")
+
     fig_sim = px.bar(sim_df, x='Scenario', y='Revenue', title="What-if Revenue Simulation")
     st.plotly_chart(fig_sim, use_container_width=True, key="pred_simulation_chart")
 
