@@ -234,7 +234,7 @@ with tabs[4]:
 
     # --- Forecast Line Chart: Revenue Projection ---
     st.subheader("Revenue Forecast")
-    # If no Date column, simulate sequential periods
+    # If you have a real date column (e.g. 'Month'), replace 'Period' with that
     revenue_ts = data.groupby('Sales_Manager_Name')['Total_Revenue'].sum().reset_index()
     revenue_ts['Period'] = range(1, len(revenue_ts)+1)
 
@@ -243,7 +243,7 @@ with tabs[4]:
         x='Period',
         y='Total_Revenue',
         markers=True,
-        title="Revenue Projection by Manager (Synthetic Periods)"
+        title="Time Series Revenue Projection by Manager"
     )
     st.plotly_chart(fig_forecast, use_container_width=True, key="pred_forecast_line")
 
@@ -263,15 +263,15 @@ with tabs[4]:
 
     # --- Decision Tree Visualization: Drivers of Closures/Revenue ---
     st.subheader("Decision Tree: Drivers of Closures/Revenue")
-    from sklearn.tree import DecisionTreeClassifier, plot_tree
+    from sklearn.tree import DecisionTreeRegressor, plot_tree
     import matplotlib.pyplot as plt
 
     X = data[['Calls_Dialed','Converted','Call_Time_Mins']]
     y = data['Deals_Closed']
-    clf = DecisionTreeClassifier(max_depth=3).fit(X, y)
+    reg = DecisionTreeRegressor(max_depth=3).fit(X, y)
 
     fig_dt, ax = plt.subplots(figsize=(10,6))
-    plot_tree(clf, feature_names=X.columns, class_names=['No Deal','Deal'], filled=True, ax=ax)
+    plot_tree(reg, feature_names=X.columns, filled=True, ax=ax)
     st.pyplot(fig_dt, key="pred_decision_tree")
 
     # --- Forecast Funnel Chart: Expected Conversion Rates ---
@@ -308,7 +308,3 @@ with tabs[4]:
     projected_rev = base_rev * (1 + (inc_calls + inc_talk)/200)
     st.metric("Projected Combined Revenue", f"₹{projected_rev:,.0f}")
 
-    fig_sim = px.bar(sim_df, x='Scenario', y='Revenue', title="What-if Revenue Simulation")
-    st.plotly_chart(fig_sim, use_container_width=True, key="pred_simulation_chart")
-
-    st.metric("Projected Combined Revenue", f"₹{projected_rev:,.0f}")
