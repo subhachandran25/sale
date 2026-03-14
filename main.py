@@ -78,13 +78,14 @@ with st.expander("Region-wise Manager Performance View"):
     fig_mgr = px.bar(mgr_perf, x='Sales_Manager_Name', y='Total_Revenue', title=f"Revenue by Managers in {selected_mgr_region}")
     st.plotly_chart(fig_mgr, use_container_width=True, key="mgr_perf_chart")
 
-# 2. DESCRIPTIVE
+
+
 # 2. DESCRIPTIVE
 with tabs[1]:
     st.header("Descriptive Analysis")
 
     # --- Donut Chart: Call Outcomes (Connected vs Not Connected) ---
-    st.subheader("Call Outcomes")
+    st.subheader("Call Outcomes by Manager")
     call_outcomes = data.groupby('Sales_Manager_Name')[['Calls_Dialed','Converted']].sum().reset_index()
     call_outcomes['Not_Connected'] = call_outcomes['Calls_Dialed'] - call_outcomes['Converted']
 
@@ -105,8 +106,8 @@ with tabs[1]:
     )
     st.plotly_chart(fig_donut, use_container_width=True, key="desc_donut_chart")
 
-    # --- Grouped Bar Chart: Deals Closed by Product/Region ---
-    st.subheader("Deals Closed by Product and Region")
+    # --- Grouped Bar Chart: Deals Closed by Region (Manager Level) ---
+    st.subheader("Deals Closed by Manager across Regions")
     deals_group = data.groupby(['Sales_Manager_Name','Region'])['Deals_Closed'].sum().reset_index()
     fig_grouped = px.bar(
         deals_group,
@@ -118,15 +119,15 @@ with tabs[1]:
     )
     st.plotly_chart(fig_grouped, use_container_width=True, key="desc_grouped_chart")
 
-    # --- Sunburst Chart: Revenue Contribution (better than Treemap) ---
+    # --- Sunburst Chart: Revenue Contribution (stop at Manager level) ---
     st.subheader("Revenue Contribution Sunburst")
-    sunburst_data = data.groupby(['Region','Sales_Manager_Name','Sales_Rep_Name'])['Total_Revenue'].sum().reset_index()
+    sunburst_data = data.groupby(['Region','Sales_Manager_Name'])['Total_Revenue'].sum().reset_index()
     fig_sunburst = px.sunburst(
         sunburst_data,
-        path=['Region','Sales_Manager_Name','Sales_Rep_Name'],
+        path=['Region','Sales_Manager_Name'],
         values='Total_Revenue',
         color='Region',
-        title="Revenue Contribution by Region → Manager → Rep"
+        title="Revenue Contribution by Region → Manager"
     )
     st.plotly_chart(fig_sunburst, use_container_width=True, key="desc_sunburst_chart")
 
@@ -136,8 +137,8 @@ with tabs[1]:
         data,
         x='Sales_Manager_Name',
         y='Call_Time_Mins',
-        box=True,       # show box inside violin
-        points="all",   # show all points
+        box=True,
+        points="all",
         color='Sales_Manager_Name',
         title="Talk Time Spread and Density by Manager"
     )
@@ -151,7 +152,7 @@ with tabs[1]:
         y='Total_Revenue',
         size='Deals_Closed',
         color='Sales_Manager_Name',
-        hover_name='Sales_Rep_Name',
+        hover_name='Sales_Manager_Name',
         title="Talk Time vs Revenue by Manager"
     )
     st.plotly_chart(fig_bubble, use_container_width=True, key="desc_bubble_chart")
