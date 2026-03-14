@@ -26,43 +26,40 @@ tabs = st.tabs(["🏠 Home", "📊 Descriptive", "🔍 Diagnostic", "🎯 Perspe
 
 # 1. HOME PAGE
 
+# 1. HOME PAGE
 with tabs[0]:
     st.title("Executive Summary")
-    # ... (Keep your metrics here)
-
-    st.subheader("Performance by Senior Manager & Region")
-    
-    # Group data by Senior Manager and Region
-    # This creates a clean dataset for the chart
-    sm_data = data.groupby(['Senior_Manager_Name', 'Region'])[['Calls_Dialed', 'Converted']].sum().reset_index()
-    
-    # Create the Bar Chart
-    # We use 'color' to differentiate regions and 'barmode' to group them
-    fig_sm = px.bar(
-        sm_data, 
-        x='Senior_Manager_Name', 
-        y=['Calls_Dialed', 'Converted'], 
-        color='Region', 
-        title="Dialed vs Converted Calls by Senior Manager (Region-wise)",
-        barmode='group'
-    )
-    
-    # Add the unique key to prevent the DuplicateElementId error
-    st.plotly_chart(fig_sm, use_container_width=True, key="home_sm_chart")
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("Dialed", data['Calls_Dialed'].sum())
+    c2.metric("Qualified", data['Qualified'].sum())
+    c3.metric("Avg Talk", f"{data['Call_Time_Mins'].mean():.1f}m")
+    c4.metric("Deals", data['Deals_Closed'].sum())
+    c5.metric("Revenue", f"₹{data['Total_Revenue'].sum():,.0f}")
     
     col1, col2 = st.columns(2)
-    fig_bar = px.bar(data, x='Sales_Rep_Name', y=['Calls_Dialed', 'Converted'], title="Dialed vs Converted")
-    col1.plotly_chart(fig_bar, use_container_width=True, key="home_bar_chart")
+
+    # --- NEW MANAGER PERFORMANCE CHART ---
+    mgr_perf_home = data.groupby('Sales_Manager_Name')[['Total_Revenue','Deals_Closed']].sum().reset_index()
+    fig_mgr_bar = px.bar(
+        mgr_perf_home, 
+        x='Sales_Manager_Name', 
+        y=['Total_Revenue','Deals_Closed'], 
+        barmode='group',
+        title="Manager Performance: Revenue & Deals"
+    )
+    col1.plotly_chart(fig_mgr_bar, use_container_width=True, key="home_mgr_bar_chart")
+
+    # --- KEEP HISTOGRAM OR REPLACE WITH PIE ---
     fig_hist_home = px.histogram(data, x='Call_Time_Mins', title="Talk Time Distribution")
     col2.plotly_chart(fig_hist_home, use_container_width=True, key="home_hist_chart")
 
-    # --- NEW PIE CHART: Revenue by Region ---
+    # --- PIE CHART: Revenue by Region ---
     st.subheader("Revenue Performance by Region")
     revenue_region = data.groupby('Region')['Total_Revenue'].sum().reset_index()
     fig_pie = px.pie(revenue_region, values='Total_Revenue', names='Region',
-                     title="Revenue Distribution Across Regions",
-                     hole=0.3)  # donut-style for clarity
+                     title="Revenue Distribution Across Regions", hole=0.3)
     st.plotly_chart(fig_pie, use_container_width=True, key="home_pie_chart")
+
 
 # --- NEW TAB: MANAGER PERFORMANCE ---
 with st.expander("Region-wise Manager Performance View"):
