@@ -195,6 +195,35 @@ with tabs[1]:
     )
     st.plotly_chart(fig_sunburst, use_container_width=True, key="desc_revenue_sunburst")
 
+    # --- Line Chart: Total Revenue vs Average Revenue per Region ---
+    st.subheader("Total vs Average Revenue by Region")
+    revenue_region = data.groupby('Region')['Total_Revenue'].sum().reset_index()
+    avg_revenue_region = data.groupby('Region')['Total_Revenue'].mean().reset_index()
+    avg_revenue_region.rename(columns={'Total_Revenue':'Avg_Revenue'}, inplace=True)
+
+    # Merge total and average
+    revenue_combined = revenue_region.merge(avg_revenue_region, on='Region')
+
+    fig_line = go.Figure()
+    # Solid line for total revenue
+    fig_line.add_trace(go.Scatter(
+        x=revenue_combined['Region'],
+        y=revenue_combined['Total_Revenue'],
+        mode='lines+markers',
+        name='Total Revenue',
+        line=dict(color='blue')
+    ))
+    # Dotted line for average revenue
+    fig_line.add_trace(go.Scatter(
+        x=revenue_combined['Region'],
+        y=revenue_combined['Avg_Revenue'],
+        mode='lines+markers',
+        name='Average Revenue',
+        line=dict(color='red', dash='dot')
+    ))
+    fig_line.update_layout(title="Total vs Average Revenue by Region")
+    st.plotly_chart(fig_line, use_container_width=True, key="desc_revenue_line")
+
     # --- Summary Table ---
     st.subheader("Summary Metrics by Senior Manager")
     summary_table = data.groupby('Senior_Manager_Name')[[
