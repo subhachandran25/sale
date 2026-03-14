@@ -35,19 +35,18 @@ with tabs[0]:
     col3.metric("Total Revenue", f"₹{data['Total_Revenue'].sum():,}")
     col4.metric("Average Talk Time (mins)", f"{data['Call_Time_Mins'].mean():.1f}")
 
-   # --- Call Outcomes Comparison: Connected vs Converted ---
-   st.subheader("Call Outcomes Comparison")
-   call_outcomes = data.groupby('Sales_Manager_Name')[['Converted','Deals_Closed']].sum().reset_index()
+    # --- Call Outcomes Comparison: Connected vs Converted ---
+    st.subheader("Call Outcomes Comparison")
+    call_outcomes = data.groupby('Sales_Manager_Name')[['Converted','Deals_Closed']].sum().reset_index()
 
-   fig_outcomes = px.bar(
-     call_outcomes,
-     x='Sales_Manager_Name',
-     y=['Converted','Deals_Closed'],
-     barmode='group',
-     title="Connected Calls vs Converted Leads by Manager"
-   )
-st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_connected_vs_converted")
-
+    fig_outcomes = px.bar(
+        call_outcomes,
+        x='Sales_Manager_Name',
+        y=['Converted','Deals_Closed'],
+        barmode='group',
+        title="Connected Calls vs Converted Leads by Manager"
+    )
+    st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_connected_vs_converted")
 
     # --- Deals Closed by Region ---
     st.subheader("Deals Closed by Manager across Regions")
@@ -60,9 +59,9 @@ st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_conne
         barmode='group',
         title="Deals Closed by Manager across Regions"
     )
-    st.plotly_chart(fig_grouped, use_container_width=True, key="home_grouped_chart")
+    st.plotly_chart(fig_grouped, use_container_width=True, key="home_deals_grouped")
 
-    # --- Revenue Contribution: Stacked Bar (better than Sunburst) ---
+    # --- Revenue Contribution: Stacked Bar ---
     st.subheader("Revenue Contribution by Region and Manager")
     revenue_group = data.groupby(['Region','Sales_Manager_Name'])['Total_Revenue'].sum().reset_index()
     fig_revenue = px.bar(
@@ -73,7 +72,7 @@ st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_conne
         barmode='stack',
         title="Revenue Contribution by Manager across Regions"
     )
-    st.plotly_chart(fig_revenue, use_container_width=True, key="home_revenue_chart")
+    st.plotly_chart(fig_revenue, use_container_width=True, key="home_revenue_bar")
 
     # --- Line Chart: Talk Time Distribution by Manager ---
     st.subheader("Average Talk Time by Manager")
@@ -92,7 +91,7 @@ st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_conne
         line_color="red",
         annotation_text="Overall Average"
     )
-    st.plotly_chart(fig_line, use_container_width=True, key="home_line_chart")
+    st.plotly_chart(fig_line, use_container_width=True, key="home_talktime_line")
 
     # --- Bubble Chart: Talk Time vs Revenue ---
     st.subheader("Talk Time vs Revenue (Bubble Size = Deals Closed)")
@@ -105,7 +104,7 @@ st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_conne
         hover_name='Sales_Manager_Name',
         title="Talk Time vs Revenue by Manager"
     )
-    st.plotly_chart(fig_bubble, use_container_width=True, key="home_bubble_chart")
+    st.plotly_chart(fig_bubble, use_container_width=True, key="home_talktime_bubble")
 
     # --- Lead Buckets Pie Chart across Regions ---
     st.subheader("Lead Buckets Distribution")
@@ -137,6 +136,7 @@ st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_conne
         title="Lead Buckets Composition by Region"
     )
     st.plotly_chart(fig_lead_bar, use_container_width=True, key="home_lead_bar")
+
 
 
 # 2. DESCRIPTIVE
