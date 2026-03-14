@@ -27,6 +27,7 @@ tabs = st.tabs(["🏠 Home", "📊 Descriptive", "🔍 Diagnostic", "🎯 Perspe
 # 1. HOME PAGE
 
 # 1. HOME PAGE
+# 1. HOME PAGE
 with tabs[0]:
     st.title("Executive Summary")
     c1, c2, c3, c4, c5 = st.columns(5)
@@ -39,17 +40,17 @@ with tabs[0]:
     col1, col2 = st.columns(2)
 
     # --- NEW MANAGER PERFORMANCE CHART ---
-    mgr_perf_home = data.groupby('Sales_Manager_Name')[['Total_Revenue','Deals_Closed']].sum().reset_index()
+    mgr_perf_home = data.groupby('Sales_Manager_Name')[['Converted','Deals_Closed']].sum().reset_index()
     fig_mgr_bar = px.bar(
         mgr_perf_home, 
         x='Sales_Manager_Name', 
-        y=['Total_Revenue','Deals_Closed'], 
+        y=['Converted','Deals_Closed'], 
         barmode='group',
-        title="Manager Performance: Revenue & Deals"
+        title="Manager Performance: Connected Calls vs Deals Closed"
     )
     col1.plotly_chart(fig_mgr_bar, use_container_width=True, key="home_mgr_bar_chart")
 
-    # --- KEEP HISTOGRAM OR REPLACE WITH PIE ---
+    # Keep histogram for talk time distribution
     fig_hist_home = px.histogram(data, x='Call_Time_Mins', title="Talk Time Distribution")
     col2.plotly_chart(fig_hist_home, use_container_width=True, key="home_hist_chart")
 
@@ -59,6 +60,7 @@ with tabs[0]:
     fig_pie = px.pie(revenue_region, values='Total_Revenue', names='Region',
                      title="Revenue Distribution Across Regions", hole=0.3)
     st.plotly_chart(fig_pie, use_container_width=True, key="home_pie_chart")
+
 
 
 # --- NEW TAB: MANAGER PERFORMANCE ---
