@@ -142,21 +142,19 @@ with tabs[1]:
     st.header("Descriptive Analysis")
 
     # --- Stacked Column Chart: Call Outcomes ---
-    st.subheader("Call Outcomes by Sales Manager")
-    # Aggregate outcomes by manager
-    outcomes = data.groupby('Sales_Manager_Name')[['Disqualified','Not_Connected','Qualified','Converted']].sum().reset_index()
+    st.subheader("Call Outcomes by Senior Manager")
+    outcomes = data.groupby('Senior_Manager_Name')[['Disqualified','No_Answer','Qualified','Converted']].sum().reset_index()
 
-    # Melt into long format for stacked column chart
     outcomes_long = outcomes.melt(
-        id_vars=['Sales_Manager_Name'],
-        value_vars=['Disqualified','Not_Connected','Qualified','Converted'],
+        id_vars=['Senior_Manager_Name'],
+        value_vars=['Disqualified','No_Answer','Qualified','Converted'],
         var_name='Outcome',
         value_name='Count'
     )
 
     fig_outcomes = px.bar(
         outcomes_long,
-        x='Sales_Manager_Name',
+        x='Senior_Manager_Name',
         y='Count',
         color='Outcome',
         barmode='stack',
@@ -164,12 +162,12 @@ with tabs[1]:
     )
     st.plotly_chart(fig_outcomes, use_container_width=True, key="desc_call_outcomes")
 
-    # --- Lead Funnel by Region (grouped by Sales Manager) ---
-    st.subheader("Lead Funnel by Region and Sales Manager")
-    funnel_data = data.groupby(['Region','Sales_Manager_Name'])[['New_Leads','Followup_Leads','Qualified','Disqualified']].sum().reset_index()
+    # --- Lead Funnel by Region ---
+    st.subheader("Lead Funnel by Region and Senior Manager")
+    funnel_data = data.groupby(['Region','Senior_Manager_Name'])[['New_Leads','Followup_Leads','Qualified','Disqualified']].sum().reset_index()
 
     funnel_long = funnel_data.melt(
-        id_vars=['Region','Sales_Manager_Name'],
+        id_vars=['Region','Senior_Manager_Name'],
         value_vars=['New_Leads','Followup_Leads','Qualified','Disqualified'],
         var_name='Stage',
         value_name='Count'
@@ -180,27 +178,27 @@ with tabs[1]:
         x='Count',
         y='Stage',
         color='Region',
-        facet_col='Sales_Manager_Name',
-        title="Lead Funnel across Regions by Sales Manager"
+        facet_col='Senior_Manager_Name',
+        title="Lead Funnel across Regions by Senior Manager"
     )
     st.plotly_chart(fig_funnel, use_container_width=True, key="desc_lead_funnel")
 
     # --- Revenue Contribution Sunburst ---
     st.subheader("Revenue Contribution Sunburst")
-    revenue_data = data.groupby(['Region','Sales_Manager_Name'])['Total_Revenue'].sum().reset_index()
+    revenue_data = data.groupby(['Region','Senior_Manager_Name'])['Total_Revenue'].sum().reset_index()
 
     fig_sunburst = px.sunburst(
         revenue_data,
-        path=['Region','Sales_Manager_Name'],
+        path=['Region','Senior_Manager_Name'],
         values='Total_Revenue',
         color='Region',
-        title="Revenue Contribution by Region → Sales Manager"
+        title="Revenue Contribution by Region → Senior Manager"
     )
     st.plotly_chart(fig_sunburst, use_container_width=True, key="desc_revenue_sunburst")
 
     # --- Summary Table ---
-    st.subheader("Summary Metrics by Sales Manager")
-    summary_table = data.groupby('Sales_Manager_Name')[['Calls_Dialed','Converted','Deals_Closed','Total_Revenue','Call_Time_Mins']].sum().reset_index()
+    st.subheader("Summary Metrics by Senior Manager")
+    summary_table = data.groupby('Senior_Manager_Name')[['Calls_Dialed','New_Leads','Followup_Leads','Qualified','Disqualified','Converted','Deals_Closed','Total_Revenue','Call_Time_Mins']].sum().reset_index()
     st.dataframe(summary_table, use_container_width=True)
 
 
