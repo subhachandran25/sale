@@ -91,52 +91,37 @@ with tabs[1]:
     st.dataframe(data.describe(), use_container_width=True)
 # 3. DIAGNOSTIC
 with tabs[1]:
-    st.header("Diagnostic Analysis")
+    st.header("Descriptive Analysis")
     
-    # DEBUG: Check if data is empty
-    if data.empty:
-        st.warning("No data available for the selected filters. Please adjust your sidebar filters.")
-        st.stop() # Stops the code here so it doesn't crash on charts
+    # 1. FORCE DATA TYPES (This fixes the "Charts not showing" issue)
+    # This ensures numbers are actually numbers
+    numeric_cols = ['Total_Revenue', 'Calls_Dialed', 'Converted', 'Deals_Closed', 'Call_Time_Mins']
+    for col in numeric_cols:
+        if col in data.columns:
+            data[col] = pd.to_numeric(data[col], errors='coerce').fillna(0)
     
-    # ... (rest of your chart code)
-    
-    # Row 1: Pareto & Box Plot
-    col1, col2 = st.columns(2)
-    
-    # 1. Pareto Chart: Top Revenue Drivers
-    pareto_data = data.groupby('Sales_Rep_Name')['Total_Revenue'].sum().sort_values(ascending=False).reset_index()
-    fig_pareto = px.bar(pareto_data, x='Sales_Rep_Name', y='Total_Revenue', 
-                        title="Pareto: Revenue Contribution by Rep")
-    col1.plotly_chart(fig_pareto, use_container_width=True)
-    
-    # 2. Box Plot: Talk Time Outliers
-    fig_box = px.box(data, y='Call_Time_Mins', title="Talk Time: Outlier Detection")
-    col2.plotly_chart(fig_box, use_container_width=True)
-    
-    # Row 2: Funnel & Heatmap
-    col3, col4 = st.columns(2)
-    
-    # 3. Conversion Funnel
-    funnel_df = pd.DataFrame({
-        "Stage": ["Dialed", "Connected", "Closed Deals", "Revenue"],
-        "Value": [data['Calls_Dialed'].sum(), data['Converted'].sum(), 
-                  data['Deals_Closed'].sum(), data['Total_Revenue'].sum()]
-    })
-    fig_funnel = px.funnel(funnel_df, x='Value', y='Stage', title="Conversion Funnel")
-    col3.plotly_chart(fig_funnel, use_container_width=True)
-    
-    # 4. Correlation Heatmap
-    # We select only numeric columns for the correlation matrix
-    corr_matrix = data[['Calls_Dialed', 'Call_Time_Mins', 'Deals_Closed', 'Total_Revenue', 'Converted']].corr()
-    fig_heat = px.imshow(corr_matrix, text_auto=True, title="Correlation Heatmap")
-    col4.plotly_chart(fig_heat, use_container_width=True)
-    
-    # Row 3: Stacked Bar Chart
-    st.subheader("Call Efficiency: Dialed vs Connected")
-    # 5. Stacked Bar Chart (Dialed vs Connected)
-    fig_stacked = px.bar(data, x='Sales_Rep_Name', y=['Calls_Dialed', 'Converted'], 
-                         title="Dialed vs Connected Calls per Rep", barmode='stack')
-    st.plotly_chart(fig_stacked, use_container_width=True)
+    # 2. DEBUG: Check if data is actually there
+    st.write(f"Rows in current view: {len(data)}")
+    if len(data) == 0:
+        st.error("No data found for this selection. Check your filters.")
+    else:
+        # 3. PARETO CHART
+        st.subheader("Pareto: Revenue Contribution")
+        pareto_data = data.groupby('Sales_Rep_Name')['Total_Revenue'].sum().sort_values(ascending=False).reset_index()
+        fig_pareto = px.bar(pareto_data, x='Sales_Rep_Name', y='Total_Revenue')
+        st.plotly_chart(fig_pareto, use_container_width=True)
+        
+        # 4. BOX PLOT
+        st.subheader("Talk Time Outliers")
+        fig_box = px.box(data, y='Call_Time_Mins')
+        st.plotly_chart(fig_box, use_container_width=True)
+        
+        # 5. STACKED BAR (Dialed vs Converted)
+        st.subheader("Call Efficiency")
+        # We melt the data to make it stackable
+        df_melted = data.melt(id_vars=['Sales_Rep_Name'], value_vars=['Calls_Dialed', 'Converted'])
+        fig_stacked = px.bar(df_melted, x='Sales_Rep_Name', y='value', color='variable', barmode='stack')
+        st.plotly_chart(fig_stacked, use_container_width=True)
 
 # 4. PERSPECTIVE
 with tabs[3]:
