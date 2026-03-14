@@ -79,30 +79,60 @@ with st.expander("Region-wise Manager Performance View"):
     st.plotly_chart(fig_mgr, use_container_width=True, key="mgr_perf_chart")
 
 # 2. DESCRIPTIVE
+# 2. DESCRIPTIVE
 with tabs[1]:
     st.header("Descriptive Analysis")
-    col1, col2 = st.columns(2)
 
-    fig_eff = px.bar(data, x='Sales_Rep_Name', y=['Calls_Dialed', 'Converted'], 
-                     title="Call Efficiency: Dialed vs Converted Calls", barmode='group')
-    col1.plotly_chart(fig_eff, use_container_width=True, key="desc_eff_chart")
+    # --- Donut Chart: Call Outcomes (Connected vs Not Connected) ---
+    st.subheader("Call Outcomes by Manager")
+    call_outcomes = data.groupby('Sales_Manager_Name')[['Calls_Dialed','Converted']].sum().reset_index()
+    call_outcomes['Not_Connected'] = call_outcomes['Calls_Dialed'] - call_outcomes['Converted']
+    fig_donut = px.pie(call_outcomes, values='Calls_Dialed', names=['Converted','Not_Connected'],
+                       title="Dialed Calls Breakdown (Connected vs Not Connected)",
+                       hole=0.4)
+    st.plotly_chart(fig_donut, use_container_width=True, key="desc_donut_chart")
 
-    fig_hist = px.histogram(data, x='Call_Time_Mins', nbins=20, 
-                            title="Talk Time Distribution (Outlier Detection)",
-                            color_discrete_sequence=['#636EFA'])
-    col2.plotly_chart(fig_hist, use_container_width=True, key="desc_hist_chart")
+    # --- Grouped Bar Chart: Deals Closed by Product/Region ---
+    st.subheader("Deals Closed by Product and Region")
+    deals_group = data.groupby(['Sales_Manager_Name','Region'])['Deals_Closed'].sum().reset_index()
+    fig_grouped = px.bar(deals_group, x='Sales_Manager_Name', y='Deals_Closed',
+                         color='Region', barmode='group',
+                         title="Deals Closed by Manager across Regions")
+    st.plotly_chart(fig_grouped, use_container_width=True, key="desc_grouped_chart")
 
-    st.subheader("Conversion Funnel")
-    funnel_df = pd.DataFrame({
-        "Stage": ["Dialed", "Qualified", "Converted", "Deals Closed"],
-        "Count": [data['Calls_Dialed'].sum(), data['Qualified'].sum(), 
-                  data['Converted'].sum(), data['Deals_Closed'].sum()]
-    })
-    fig_funnel = px.funnel(funnel_df, x='Count', y='Stage', title="Sales Conversion Funnel")
-    st.plotly_chart(fig_funnel, use_container_width=True, key="desc_funnel_chart")
+    # --- Treemap: Revenue Contribution ---
+    st.subheader("Revenue Contribution Treemap")
+    treemap_data = data.groupby(['Region','Sales_Manager_Name','Sales_Rep_Name'])['Total_Revenue'].sum().reset_index()
+    fig_treemap = px.treemap(treemap_data, path=['Region','Sales_Manager_Name','Sales_Rep_Name'],
+                             values='Total_Revenue',
+                             title="Revenue Contribution by Rep → Manager → Region")
+    st.plotly_chart(fig_treemap, use_container_width=True, key="desc_treemap_chart")
 
+    # --- Stacked Column Chart: Talk Time Buckets by Rep ---
+    st.subheader("Talk Time Buckets by Rep")
+    def bucket_time(t):
+        if t < 5: return "Short"
+        elif t < 15: return "Medium"
+        else: return "Long"
+    data['Talk_Bucket'] = data['Call_Time_Mins'].apply(bucket_time)
+    talk_buckets = data.groupby(['Sales_Rep_Name','Talk_Bucket']).size().reset_index(name='Count')
+    fig_stacked = px.bar(talk_buckets, x='Sales_Rep_Name', y='Count',
+                         color='Talk_Bucket', barmode='stack',
+                         title="Talk Time Distribution by Rep")
+    st.plotly_chart(fig_stacked, use_container_width=True, key="desc_stacked_chart")
+
+    # --- Bubble Chart: Talk Time vs Revenue ---
+    st.subheader("Talk Time vs Revenue (Bubble Size = Deals Closed)")
+    fig_bubble = px.scatter(data, x='Call_Time_Mins', y='Total_Revenue',
+                            size='Deals_Closed', color='Sales_Manager_Name',
+                            hover_name='Sales_Rep_Name',
+                            title="Talk Time vs Revenue by Manager")
+    st.plotly_chart(fig_bubble, use_container_width=True, key="desc_bubble_chart")
+
+    # --- Summary Metrics Table ---
     st.subheader("Summary Metrics Table")
     st.dataframe(data.describe(), use_container_width=True)
+
 
 # 3. DIAGNOSTIC
 with tabs[2]:
