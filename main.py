@@ -36,18 +36,92 @@ with tabs[0]:
     col3.metric("Total Revenue", f"₹{data['Total_Revenue'].sum():,}")
     col4.metric("Average Talk Time (mins)", f"{data['Call_Time_Mins'].mean():.1f}")
 
+    # --- Donut Chart: Call Outcomes ---
+    st.subheader("Call Outcomes")
+    call_outcomes = data.groupby('Sales_Manager_Name')[['Calls_Dialed','Converted']].sum().reset_index()
+    call_outcomes['Not_Connected'] = call_outcomes['Calls_Dialed'] - call_outcomes['Converted']
+    outcomes_long = call_outcomes.melt(
+        id_vars=['Sales_Manager_Name'],
+        value_vars=['Converted','Not_Connected'],
+        var_name='Outcome',
+        value_name='Count'
+    )
+    fig_donut = px.pie(
+        outcomes_long,
+        values='Count',
+        names='Outcome',
+        color='Outcome',
+        title="Dialed Calls Breakdown (Connected vs Not Connected)",
+        hole=0.4
+    )
+    st.plotly_chart(fig_donut, use_container_width=True, key="home_donut_chart")
+
+    # --- Grouped Bar Chart: Deals Closed by Region ---
+    st.subheader("Deals Closed by Manager across Regions")
+    deals_group = data.groupby(['Sales_Manager_Name','Region'])['Deals_Closed'].sum().reset_index()
+    fig_grouped = px.bar(
+        deals_group,
+        x='Sales_Manager_Name',
+        y='Deals_Closed',
+        color='Region',
+        barmode='group',
+        title="Deals Closed by Manager across Regions"
+    )
+    st.plotly_chart(fig_grouped, use_container_width=True, key="home_grouped_chart")
+
+    # --- Sunburst Chart: Revenue Contribution ---
+    st.subheader("Revenue Contribution Sunburst")
+    sunburst_data = data.groupby(['Region','Sales_Manager_Name'])['Total_Revenue'].sum().reset_index()
+    fig_sunburst = px.sunburst(
+        sunburst_data,
+        path=['Region','Sales_Manager_Name'],
+        values='Total_Revenue',
+        color='Region',
+        title="Revenue Contribution by Region → Manager"
+    )
+    st.plotly_chart(fig_sunburst, use_container_width=True, key="home_sunburst_chart")
+
+    # --- Line Chart: Talk Time Distribution by Manager ---
+    st.subheader("Average Talk Time by Manager")
+    talktime_mgr = data.groupby('Sales_Manager_Name')['Call_Time_Mins'].mean().reset_index()
+    avg_talk = talktime_mgr['Call_Time_Mins'].mean()
+    fig_line = px.line(
+        talktime_mgr,
+        x='Sales_Manager_Name',
+        y='Call_Time_Mins',
+        markers=True,
+        title="Average Talk Time per Manager"
+    )
+    fig_line.add_hline(
+        y=avg_talk,
+        line_dash="dot",
+        line_color="red",
+        annotation_text="Overall Average"
+    )
+    st.plotly_chart(fig_line, use_container_width=True, key="home_line_chart")
+
+    # --- Bubble Chart: Talk Time vs Revenue ---
+    st.subheader("Talk Time vs Revenue (Bubble Size = Deals Closed)")
+    fig_bubble = px.scatter(
+        data,
+        x='Call_Time_Mins',
+        y='Total_Revenue',
+        size='Deals_Closed',
+        color='Sales_Manager_Name',
+        hover_name='Sales_Manager_Name',
+        title="Talk Time vs Revenue by Manager"
+    )
+    st.plotly_chart(fig_bubble, use_container_width=True, key="home_bubble_chart")
+
     # --- Lead Buckets Pie Chart across Regions ---
     st.subheader("Lead Buckets Distribution")
     lead_buckets = data.groupby('Region')[['New_Leads','Followup_Leads','Qualified','Disqualified']].sum().reset_index()
-
     lead_long = lead_buckets.melt(
         id_vars=['Region'],
         value_vars=['New_Leads','Followup_Leads','Qualified','Disqualified'],
         var_name='Lead_Type',
         value_name='Count'
     )
-
-    # Overall distribution pie chart
     fig_lead_pie = px.pie(
         lead_long,
         values='Count',
