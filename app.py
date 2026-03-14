@@ -43,7 +43,7 @@ with st.expander("Region-wise Manager Performance View"):
     st.header("Manager Performance by Region")
     
     # Filter for specific region
-    selected_mgr_region = st.selectbox("Select Region for Manager View", df['Region'].unique(), key="mgr_view_reg")
+    selected_mgr_region = st.selectbox("Select Region for Manager View", df['Region'].unique())
     mgr_data = df[df['Region'] == selected_mgr_region]
     
     # Group by Manager
@@ -86,7 +86,7 @@ with tabs[1]:
     fig_funnel = px.funnel(funnel_df, x='Count', y='Stage', title="Sales Conversion Funnel")
 
 # To this (a unique key):
-st.plotly_chart(fig_funnel, use_container_width=True, key="funnel_chart_home")
+st.plotly_chart(fig_funnel, use_container_width=True)
     
     # KPI Table
     # If this is inside a 'with' block, it should look like this:
@@ -144,7 +144,7 @@ with tabs[3]:
     
     # 2. Radar Chart (Multi-metric comparison)
     st.subheader("Multi-Metric Radar Analysis")
-    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique(), key="radar_persp")
+    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique())
     rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0]
     fig_radar = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                               theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
@@ -174,7 +174,7 @@ with tabs[3]:
     area_data = data.sort_values('Total_Revenue').reset_index()
     fig_area = px.area(area_data, x=area_data.index, y='Total_Revenue', color='Region', title="Cumulative Revenue by Region")
     st.plotly_chart(fig_area, use_container_width=True)
-    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique(), key="radar_rep")
+    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique())
     rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0]
     fig = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                         theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
@@ -190,11 +190,11 @@ with tabs[4]:
     avg_rev = data['Total_Revenue'].mean()
     fig_bench = px.bar(data, x='Sales_Rep_Name', y='Total_Revenue', title="Revenue per Rep vs Team Average")
     fig_bench.add_hline(y=avg_rev, line_dash="dash", line_color="red", annotation_text="Team Average")
-    st.plotly_chart(fig_bench, use_container_width=True,key="benchmark_chart_1")
+    st.plotly_chart(fig_bench, use_container_width=True)
     
     # 2. Radar Chart (Multi-metric comparison)
     st.subheader("Multi-Metric Radar Analysis")
-    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique(), key="radar_persp_unique_2")
+    rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique())
     rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0]
     fig_radar = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                               theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
