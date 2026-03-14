@@ -40,6 +40,14 @@ with tabs[0]:
     fig_hist_home = px.histogram(data, x='Call_Time_Mins', title="Talk Time Distribution")
     col2.plotly_chart(fig_hist_home, use_container_width=True, key="home_hist_chart")
 
+    # --- NEW PIE CHART: Revenue by Region ---
+    st.subheader("Revenue Performance by Region")
+    revenue_region = data.groupby('Region')['Total_Revenue'].sum().reset_index()
+    fig_pie = px.pie(revenue_region, values='Total_Revenue', names='Region',
+                     title="Revenue Distribution Across Regions",
+                     hole=0.3)  # donut-style for clarity
+    st.plotly_chart(fig_pie, use_container_width=True, key="home_pie_chart")
+
 # --- NEW TAB: MANAGER PERFORMANCE ---
 with st.expander("Region-wise Manager Performance View"):
     st.header("Manager Performance by Region")
