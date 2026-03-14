@@ -93,6 +93,13 @@ with tabs[1]:
 with tabs[1]:
     st.header("Descriptive Analysis")
     
+    # DEBUG: Check if data is empty
+    if data.empty:
+        st.warning("No data available for the selected filters. Please adjust your sidebar filters.")
+        st.stop() # Stops the code here so it doesn't crash on charts
+    
+    # ... (rest of your chart code)
+    
     # Row 1: Pareto & Box Plot
     col1, col2 = st.columns(2)
     
