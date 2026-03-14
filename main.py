@@ -253,7 +253,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # 4. DIAGNOSTIC
-with tabs[3]:
+with tabs[2]:
     st.header("Diagnostic Analysis")
 
     # --- Scatter Plot: Dialed Calls vs Talk Time ---
