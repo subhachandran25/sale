@@ -23,6 +23,7 @@ if selected_region != 'All':
 
 # --- TABS ---
 tabs = st.tabs(["🏠 Home", "📊 Descriptive", "🔍 Diagnostic", "🎯 Perspective", "🔮 Predictive"])
+
 # 2. DESCRIPTIVE
 with tabs[1]:
     st.header("Descriptive Analysis")
@@ -45,7 +46,7 @@ with tabs[1]:
         title="Dialed Calls Breakdown (Connected vs Not Connected)",
         hole=0.4
     )
-    st.plotly_chart(fig_donut, use_container_width=True, key="desc_donut_chart")
+    st.plotly_chart(fig_donut, use_container_width=True, key="desc_outcomes_donut")
 
     # --- Grouped Bar Chart: Deals Closed by Region ---
     st.subheader("Deals Closed by Manager across Regions")
@@ -58,7 +59,7 @@ with tabs[1]:
         barmode='group',
         title="Deals Closed by Manager across Regions"
     )
-    st.plotly_chart(fig_grouped, use_container_width=True, key="desc_grouped_chart")
+    st.plotly_chart(fig_grouped, use_container_width=True, key="desc_deals_grouped")
 
     # --- Revenue Contribution: Region → Manager ---
     st.subheader("Revenue Contribution by Region and Manager")
@@ -71,7 +72,7 @@ with tabs[1]:
         barmode='stack',
         title="Revenue Contribution by Manager across Regions"
     )
-    st.plotly_chart(fig_revenue, use_container_width=True, key="desc_revenue_chart")
+    st.plotly_chart(fig_revenue, use_container_width=True, key="desc_revenue_bar")
 
     # --- Line Chart: Talk Time Distribution by Manager ---
     st.subheader("Average Talk Time by Manager")
@@ -90,7 +91,7 @@ with tabs[1]:
         line_color="red",
         annotation_text="Overall Average"
     )
-    st.plotly_chart(fig_line, use_container_width=True, key="desc_line_chart")
+    st.plotly_chart(fig_line, use_container_width=True, key="desc_talktime_line")
 
     # --- Bubble Chart: Talk Time vs Revenue ---
     st.subheader("Talk Time vs Revenue (Bubble Size = Deals Closed)")
@@ -103,7 +104,7 @@ with tabs[1]:
         hover_name='Sales_Manager_Name',
         title="Talk Time vs Revenue by Manager"
     )
-    st.plotly_chart(fig_bubble, use_container_width=True, key="desc_bubble_chart")
+    st.plotly_chart(fig_bubble, use_container_width=True, key="desc_talktime_bubble")
 
     # --- Lead Funnel Chart across Regions ---
     st.subheader("Lead Funnel by Region")
