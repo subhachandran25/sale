@@ -36,16 +36,16 @@ with tabs[0]:
     col4.metric("Average Talk Time (mins)", f"{data['Call_Time_Mins'].mean():.1f}")
 
    # --- Call Outcomes Comparison: Connected vs Converted ---
-st.subheader("Call Outcomes Comparison")
-call_outcomes = data.groupby('Sales_Manager_Name')[['Converted','Deals_Closed']].sum().reset_index()
+   st.subheader("Call Outcomes Comparison")
+   call_outcomes = data.groupby('Sales_Manager_Name')[['Converted','Deals_Closed']].sum().reset_index()
 
-fig_outcomes = px.bar(
-    call_outcomes,
-    x='Sales_Manager_Name',
-    y=['Converted','Deals_Closed'],
-    barmode='group',
-    title="Connected Calls vs Converted Leads by Manager"
-)
+   fig_outcomes = px.bar(
+     call_outcomes,
+     x='Sales_Manager_Name',
+     y=['Converted','Deals_Closed'],
+     barmode='group',
+     title="Connected Calls vs Converted Leads by Manager"
+   )
 st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_connected_vs_converted")
 
 
