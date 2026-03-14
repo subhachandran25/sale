@@ -142,6 +142,7 @@ with tabs[3]:
 # 5. PREDICTIVE
 with tabs[4]:
     st.header("Predictive Analysis")
+
     st.subheader("Benchmark: Rep Performance vs Team Average")
     avg_rev = data['Total_Revenue'].mean()
     fig_bench_pred = px.bar(data, x='Sales_Rep_Name', y='Total_Revenue', title="Revenue per Rep vs Team Average")
@@ -150,4 +151,42 @@ with tabs[4]:
 
     st.subheader("Multi-Metric Radar Analysis")
     rep = st.selectbox("Select Rep for Radar", data['Sales_Rep_Name'].unique(), key="radar_pred_selectbox")
-    rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0
+    rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0]   # ✅ fixed bracket
+    fig_radar_pred = px.line_polar(
+        r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
+        theta=['Calls', 'TalkTime', 'Deals'], line_close=True
+    )
+    fig_radar_pred.update_traces(fill='toself')
+    st.plotly_chart(fig_radar_pred, use_container_width=True, key="pred_radar_chart")
+
+    st.subheader("Revenue Contribution Waterfall")
+    fig_water_pred = go.Figure(go.Waterfall(
+        name="Revenue", orientation="v",
+        measure=["relative", "relative", "relative", "total"],
+        x=["New Leads", "Qualified", "Converted", "Total Revenue"],
+        y=[0, data['Qualified'].sum(), data['Converted'].sum(), data['Total_Revenue'].sum()],
+        connector={"line": {"color": "rgb(63, 63, 63)"}},
+    ))
+    st.plotly_chart(fig_water_pred, use_container_width=True, key="pred_waterfall_chart")
+
+    st.subheader("Cohort Analysis: Revenue by Region")
+    cohort_data_pred = data.groupby('Region')['Total_Revenue'].sum().reset_index()
+    fig_cohort_pred = px.bar(cohort_data_pred, x='Region', y='Total_Revenue', color='Region', title="Revenue by Region Cohort")
+    st.plotly_chart(fig_cohort_pred, use_container_width=True, key="pred_cohort_chart")
+
+    st.subheader("Cumulative Revenue Contribution")
+    area_data_pred = data.sort_values('Total_Revenue').reset_index()
+    fig_area_pred = px.area(area_data_pred, x=area_data_pred.index, y='Total_Revenue', color='Region', title="Cumulative Revenue by Region")
+    st.plotly_chart(fig_area_pred, use_container_width=True, key="pred_area_chart")
+
+    # Predictive model
+    X = data[['Calls_Dialed', 'Call_Time_Mins', 'Converted']]
+    y = data['Total_Revenue']
+    model = DecisionTreeRegressor().fit(X, y)
+
+    fig_reg = px.scatter(data, x='Call_Time_Mins', y='Total_Revenue', trendline="ols", title="Revenue vs Talk Time")
+    st.plotly_chart(fig_reg, use_container_width=True, key="pred_reg_chart")
+
+    inc = st.slider("Increase Dialed Calls by %", 0, 50, 10, key="sim_slider")
+    st.metric("Projected Revenue Lift", f"₹{(data['Total_Revenue'].sum() * (inc/100)):,.0f}")
+
