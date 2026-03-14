@@ -23,7 +23,6 @@ if selected_region != 'All':
 
 # --- TABS ---
 tabs = st.tabs(["🏠 Home", "📊 Descriptive", "🔍 Diagnostic", "🎯 Perspective", "🔮 Predictive"])
-
 # 1. HOME
 with tabs[0]:
     st.header("Home Dashboard")
@@ -36,27 +35,19 @@ with tabs[0]:
     col3.metric("Total Revenue", f"₹{data['Total_Revenue'].sum():,}")
     col4.metric("Average Talk Time (mins)", f"{data['Call_Time_Mins'].mean():.1f}")
 
-    # --- Donut Chart: Call Outcomes ---
-    st.subheader("Call Outcomes")
+    # --- Call Outcomes: Connected vs Dialed ---
+    st.subheader("Call Outcomes Comparison")
     call_outcomes = data.groupby('Sales_Manager_Name')[['Calls_Dialed','Converted']].sum().reset_index()
-    call_outcomes['Not_Connected'] = call_outcomes['Calls_Dialed'] - call_outcomes['Converted']
-    outcomes_long = call_outcomes.melt(
-        id_vars=['Sales_Manager_Name'],
-        value_vars=['Converted','Not_Connected'],
-        var_name='Outcome',
-        value_name='Count'
+    fig_outcomes = px.bar(
+        call_outcomes,
+        x='Sales_Manager_Name',
+        y=['Calls_Dialed','Converted'],
+        barmode='group',
+        title="Connected Calls vs Dialed Calls by Manager"
     )
-    fig_donut = px.pie(
-        outcomes_long,
-        values='Count',
-        names='Outcome',
-        color='Outcome',
-        title="Dialed Calls Breakdown (Connected vs Not Connected)",
-        hole=0.4
-    )
-    st.plotly_chart(fig_donut, use_container_width=True, key="home_donut_chart")
+    st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_chart")
 
-    # --- Grouped Bar Chart: Deals Closed by Region ---
+    # --- Deals Closed by Region ---
     st.subheader("Deals Closed by Manager across Regions")
     deals_group = data.groupby(['Sales_Manager_Name','Region'])['Deals_Closed'].sum().reset_index()
     fig_grouped = px.bar(
@@ -69,17 +60,18 @@ with tabs[0]:
     )
     st.plotly_chart(fig_grouped, use_container_width=True, key="home_grouped_chart")
 
-    # --- Sunburst Chart: Revenue Contribution ---
-    st.subheader("Revenue Contribution Sunburst")
-    sunburst_data = data.groupby(['Region','Sales_Manager_Name'])['Total_Revenue'].sum().reset_index()
-    fig_sunburst = px.sunburst(
-        sunburst_data,
-        path=['Region','Sales_Manager_Name'],
-        values='Total_Revenue',
+    # --- Revenue Contribution: Stacked Bar (better than Sunburst) ---
+    st.subheader("Revenue Contribution by Region and Manager")
+    revenue_group = data.groupby(['Region','Sales_Manager_Name'])['Total_Revenue'].sum().reset_index()
+    fig_revenue = px.bar(
+        revenue_group,
+        x='Sales_Manager_Name',
+        y='Total_Revenue',
         color='Region',
-        title="Revenue Contribution by Region → Manager"
+        barmode='stack',
+        title="Revenue Contribution by Manager across Regions"
     )
-    st.plotly_chart(fig_sunburst, use_container_width=True, key="home_sunburst_chart")
+    st.plotly_chart(fig_revenue, use_container_width=True, key="home_revenue_chart")
 
     # --- Line Chart: Talk Time Distribution by Manager ---
     st.subheader("Average Talk Time by Manager")
@@ -143,8 +135,6 @@ with tabs[0]:
         title="Lead Buckets Composition by Region"
     )
     st.plotly_chart(fig_lead_bar, use_container_width=True, key="home_lead_bar")
-
-
 
 # --- NEW TAB: MANAGER PERFORMANCE ---
 with st.expander("Region-wise Manager Performance View"):
