@@ -249,7 +249,6 @@ with st.expander("Region-wise Manager Performance View"):
     fig_mgr = px.bar(mgr_perf, x='Sales_Manager_Name', y='Total_Revenue', title=f"Revenue by Managers in {selected_mgr_region}")
     st.plotly_chart(fig_mgr, use_container_width=True, key="mgr_perf_chart")
 
-
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -281,7 +280,7 @@ with tabs[3]:
     )
     st.plotly_chart(fig_corr, use_container_width=True, key="diag_corr_heatmap")
 
-    # --- Diagnostic Bar Chart: Conversion Efficiency ---
+    # --- Conversion Efficiency Bar Chart ---
     st.subheader("Conversion Efficiency by Senior Manager")
     efficiency = data.groupby('Senior_Manager_Name').agg({
         'Calls_Dialed':'sum',
@@ -300,7 +299,7 @@ with tabs[3]:
     )
     st.plotly_chart(fig_eff, use_container_width=True, key="diag_conversion_rates")
 
-    # --- Diagnostic Line Chart: Revenue vs Calls ---
+    # --- Revenue vs Calls Line Chart ---
     st.subheader("Revenue vs Calls Dialed by Region")
     rev_calls = data.groupby('Region')[['Calls_Dialed','Total_Revenue']].sum().reset_index()
 
@@ -328,7 +327,6 @@ with tabs[3]:
         'Calls_Dialed','Converted','Deals_Closed','Total_Revenue','Call_Time_Mins'
     ]].sum().reset_index()
     st.dataframe(diag_summary, use_container_width=True)
-
         
 
 # 4. PERSPECTIVE
