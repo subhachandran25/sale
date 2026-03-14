@@ -137,6 +137,9 @@ with tabs[0]:
     )
     st.plotly_chart(fig_lead_bar, use_container_width=True, key="home_lead_bar")
 
+import plotly.express as px
+import plotly.graph_objects as go
+
 # 2. DESCRIPTIVE
 with tabs[1]:
     st.header("Descriptive Analysis")
@@ -201,7 +204,6 @@ with tabs[1]:
     avg_revenue_region = data.groupby('Region')['Total_Revenue'].mean().reset_index()
     avg_revenue_region.rename(columns={'Total_Revenue':'Avg_Revenue'}, inplace=True)
 
-    # Merge total and average
     revenue_combined = revenue_region.merge(avg_revenue_region, on='Region')
 
     fig_line = go.Figure()
@@ -232,6 +234,7 @@ with tabs[1]:
         'Total_Revenue','Call_Time_Mins'
     ]].sum().reset_index()
     st.dataframe(summary_table, use_container_width=True)
+
 
 
 
