@@ -84,8 +84,6 @@ with tabs[1]:
     })
     
     fig_funnel = px.funnel(funnel_df, x='Count', y='Stage', title="Sales Conversion Funnel")
-    # Change this:
-st.plotly_chart(fig_funnel, use_container_width=True)
 
 # To this (a unique key):
 st.plotly_chart(fig_funnel, use_container_width=True, key="funnel_chart_home")
@@ -151,7 +149,7 @@ with tabs[3]:
     fig_radar = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                               theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
     fig_radar.update_traces(fill='toself')
-    st.plotly_chart(fig_radar, use_container_width=True)
+    st.plotly_chart(fig_radar, use_container_width=True,key="radar_chart_1")
     
     # 3. Waterfall Chart (Revenue Contribution)
     st.subheader("Revenue Contribution Waterfall")
@@ -192,7 +190,7 @@ with tabs[4]:
     avg_rev = data['Total_Revenue'].mean()
     fig_bench = px.bar(data, x='Sales_Rep_Name', y='Total_Revenue', title="Revenue per Rep vs Team Average")
     fig_bench.add_hline(y=avg_rev, line_dash="dash", line_color="red", annotation_text="Team Average")
-    st.plotly_chart(fig_bench, use_container_width=True)
+    st.plotly_chart(fig_bench, use_container_width=True,key="benchmark_chart_1")
     
     # 2. Radar Chart (Multi-metric comparison)
     st.subheader("Multi-Metric Radar Analysis")
@@ -201,7 +199,7 @@ with tabs[4]:
     fig_radar = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                               theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
     fig_radar.update_traces(fill='toself')
-    st.plotly_chart(fig_radar, use_container_width=True)
+    st.plotly_chart(fig_radar, use_container_width=True,key="radar_chart_1")
     
     # 3. Waterfall Chart (Revenue Contribution)
     st.subheader("Revenue Contribution Waterfall")
