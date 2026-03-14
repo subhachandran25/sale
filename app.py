@@ -149,7 +149,7 @@ with tabs[3]:
     fig_radar = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                               theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
     fig_radar.update_traces(fill='toself')
-    st.plotly_chart(fig_radar, use_container_width=True,key="radar_chart_1")
+    st.plotly_chart(fig_radar, use_container_width=True)
     
     # 3. Waterfall Chart (Revenue Contribution)
     st.subheader("Revenue Contribution Waterfall")
@@ -199,7 +199,7 @@ with tabs[4]:
     fig_radar = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                               theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
     fig_radar.update_traces(fill='toself')
-    st.plotly_chart(fig_radar, use_container_width=True,key="radar_chart_1")
+    st.plotly_chart(fig_radar, use_container_width=True)
     
     # 3. Waterfall Chart (Revenue Contribution)
     st.subheader("Revenue Contribution Waterfall")
