@@ -91,6 +91,11 @@ st.plotly_chart(fig_funnel, use_container_width=True, key="home_1")
 st.plotly_chart(fig_funnel, use_container_width=True, key="funnel_chart_home")
     
     # KPI Table
+    # If this is inside a 'with' block, it should look like this:
+with tabs[1]:
+    st.header("Descriptive Analysis")
+    # ... other code ...
+    st.subheader("Summary Metrics Table")  # <--- This must be aligned with the lines above it
     st.subheader("Summary Metrics Table")
     st.dataframe(data.describe(), use_container_width=True)
 # 3. DIAGNOSTIC
