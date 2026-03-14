@@ -239,9 +239,6 @@ with tabs[1]:
     )
     st.plotly_chart(fig_funnel, use_container_width=True, key="desc_lead_funnel")
 
-    # --- Summary Metrics Table ---
-    st.subheader("Summary Metrics Table")
-    st.dataframe(data.describe(), use_container_width=True)
 
         # --- Sunburst Chart: Revenue Contribution (stop at Manager level) ---
     st.subheader("Revenue Contribution Sunburst")
@@ -254,6 +251,11 @@ with tabs[1]:
         title="Revenue Contribution by Region → Manager"
     )
     st.plotly_chart(fig_sunburst, use_container_width=True, key="desc_sunburst_chart")
+
+   
+    # --- Summary Metrics Table ---
+    st.subheader("Summary Metrics Table")
+    st.dataframe(data.describe(), use_container_width=True)
 
 
 # --- NEW TAB: MANAGER PERFORMANCE ---
