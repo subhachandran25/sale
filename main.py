@@ -88,7 +88,6 @@ with tabs[1]:
     call_outcomes = data.groupby('Sales_Manager_Name')[['Calls_Dialed','Converted']].sum().reset_index()
     call_outcomes['Not_Connected'] = call_outcomes['Calls_Dialed'] - call_outcomes['Converted']
 
-    # Melt into long format for pie chart
     outcomes_long = call_outcomes.melt(
         id_vars=['Sales_Manager_Name'],
         value_vars=['Converted','Not_Connected'],
@@ -130,23 +129,16 @@ with tabs[1]:
     )
     st.plotly_chart(fig_treemap, use_container_width=True, key="desc_treemap_chart")
 
-    # --- Stacked Column Chart: Talk Time Buckets by Rep ---
-    st.subheader("Talk Time Buckets by Rep")
-    def bucket_time(t):
-        if t < 5: return "Short"
-        elif t < 15: return "Medium"
-        else: return "Long"
-    data['Talk_Bucket'] = data['Call_Time_Mins'].apply(bucket_time)
-    talk_buckets = data.groupby(['Sales_Rep_Name','Talk_Bucket']).size().reset_index(name='Count')
-    fig_stacked = px.bar(
-        talk_buckets,
-        x='Sales_Rep_Name',
-        y='Count',
-        color='Talk_Bucket',
-        barmode='stack',
-        title="Talk Time Distribution by Rep"
+    # --- Box Plot: Talk Time Distribution by Manager ---
+    st.subheader("Talk Time Distribution by Manager")
+    fig_box = px.box(
+        data,
+        x='Sales_Manager_Name',
+        y='Call_Time_Mins',
+        color='Sales_Manager_Name',
+        title="Talk Time Spread and Outliers"
     )
-    st.plotly_chart(fig_stacked, use_container_width=True, key="desc_stacked_chart")
+    st.plotly_chart(fig_box, use_container_width=True, key="desc_box_chart")
 
     # --- Bubble Chart: Talk Time vs Revenue ---
     st.subheader("Talk Time vs Revenue (Bubble Size = Deals Closed)")
