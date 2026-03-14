@@ -308,7 +308,3 @@ with tabs[4]:
     projected_rev = base_rev * (1 + (inc_calls + inc_talk)/200)
     st.metric("Projected Combined Revenue", f"₹{projected_rev:,.0f}")
 
-
-    projected_rev = base_rev * (1 + (inc_calls + inc_talk)/200)
-    st.metric("Projected Combined Revenue", f"₹{projected_rev:,.0f}")
-
