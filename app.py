@@ -64,13 +64,13 @@ with tabs[1]:
     fig_eff = px.bar(data, x='Sales_Rep_Name', y=['Calls_Dialed', 'Converted'], 
                      title="Call Efficiency: Dialed vs Converted Calls",
                      barmode='group')
-    col1.plotly_chart(fig_eff, use_container_width=True,key="home_1")
+    col1.plotly_chart(fig_eff, use_container_width=True)
     
     # 2. Histogram: Talk Time Distribution
     fig_hist = px.histogram(data, x='Call_Time_Mins', nbins=20, 
                             title="Talk Time Distribution (Outlier Detection)",
                             color_discrete_sequence=['#636EFA'])
-    col2.plotly_chart(fig_hist, use_container_width=True,key="home_2")
+    col2.plotly_chart(fig_hist, use_container_width=True)
     
     # Row 2: Conversion Funnel
     st.subheader("Conversion Funnel")
@@ -85,7 +85,7 @@ with tabs[1]:
     
     fig_funnel = px.funnel(funnel_df, x='Count', y='Stage', title="Sales Conversion Funnel")
     # Change this:
-st.plotly_chart(fig_funnel, use_container_width=True, key="home_1")
+st.plotly_chart(fig_funnel, use_container_width=True)
 
 # To this (a unique key):
 st.plotly_chart(fig_funnel, use_container_width=True, key="funnel_chart_home")
@@ -118,19 +118,19 @@ with tabs[1]:
         st.subheader("Pareto: Revenue Contribution")
         pareto_data = data.groupby('Sales_Rep_Name')['Total_Revenue'].sum().sort_values(ascending=False).reset_index()
         fig_pareto = px.bar(pareto_data, x='Sales_Rep_Name', y='Total_Revenue')
-        st.plotly_chart(fig_pareto, use_container_width=True,key="home_1")
+        st.plotly_chart(fig_pareto, use_container_width=True)
         
         # 4. BOX PLOT
         st.subheader("Talk Time Outliers")
         fig_box = px.box(data, y='Call_Time_Mins')
-        st.plotly_chart(fig_box, use_container_width=True,key="home_1")
+        st.plotly_chart(fig_box, use_container_width=True)
         
         # 5. STACKED BAR (Dialed vs Converted)
         st.subheader("Call Efficiency")
         # We melt the data to make it stackable
         df_melted = data.melt(id_vars=['Sales_Rep_Name'], value_vars=['Calls_Dialed', 'Converted'])
         fig_stacked = px.bar(df_melted, x='Sales_Rep_Name', y='value', color='variable', barmode='stack')
-        st.plotly_chart(fig_stacked, use_container_width=True,key="home_1")
+        st.plotly_chart(fig_stacked, use_container_width=True)
 
 # 4. PERSPECTIVE
 with tabs[3]:
@@ -142,7 +142,7 @@ with tabs[3]:
     avg_rev = data['Total_Revenue'].mean()
     fig_bench = px.bar(data, x='Sales_Rep_Name', y='Total_Revenue', title="Revenue per Rep vs Team Average")
     fig_bench.add_hline(y=avg_rev, line_dash="dash", line_color="red", annotation_text="Team Average")
-    st.plotly_chart(fig_bench, use_container_width=True,key="home_1")
+    st.plotly_chart(fig_bench, use_container_width=True)
     
     # 2. Radar Chart (Multi-metric comparison)
     st.subheader("Multi-Metric Radar Analysis")
@@ -151,7 +151,7 @@ with tabs[3]:
     fig_radar = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                               theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
     fig_radar.update_traces(fill='toself')
-    st.plotly_chart(fig_radar, use_container_width=True,key="home_1")
+    st.plotly_chart(fig_radar, use_container_width=True)
     
     # 3. Waterfall Chart (Revenue Contribution)
     st.subheader("Revenue Contribution Waterfall")
@@ -162,13 +162,13 @@ with tabs[3]:
         y=[0, data['Qualified'].sum(), data['Converted'].sum(), data['Total_Revenue'].sum()],
         connector={"line": {"color": "rgb(63, 63, 63)"}},
     ))
-    st.plotly_chart(fig_water, use_container_width=True,key="home_1")
+    st.plotly_chart(fig_water, use_container_width=True)
     
     # 4. Cohort Chart (Group by Region/Manager)
     st.subheader("Cohort Analysis: Revenue by Region")
     cohort_data = data.groupby('Region')['Total_Revenue'].sum().reset_index()
     fig_cohort = px.bar(cohort_data, x='Region', y='Total_Revenue', color='Region', title="Revenue by Region Cohort")
-    st.plotly_chart(fig_cohort, use_container_width=True,key="home_1")
+    st.plotly_chart(fig_cohort, use_container_width=True)
     
     # 5. Stacked Area Chart (Cumulative Revenue)
     st.subheader("Cumulative Revenue Contribution")
@@ -180,7 +180,7 @@ with tabs[3]:
     rep_data = data[data['Sales_Rep_Name'] == rep].iloc[0]
     fig = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                         theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
-    st.plotly_chart(fig, use_container_width=True,key="home_1")
+    st.plotly_chart(fig, use_container_width=True)
 
 # 5. PREDICTIVE
 with tabs[4]:
@@ -192,7 +192,7 @@ with tabs[4]:
     avg_rev = data['Total_Revenue'].mean()
     fig_bench = px.bar(data, x='Sales_Rep_Name', y='Total_Revenue', title="Revenue per Rep vs Team Average")
     fig_bench.add_hline(y=avg_rev, line_dash="dash", line_color="red", annotation_text="Team Average")
-    st.plotly_chart(fig_bench, use_container_width=True,key="home_1")
+    st.plotly_chart(fig_bench, use_container_width=True)
     
     # 2. Radar Chart (Multi-metric comparison)
     st.subheader("Multi-Metric Radar Analysis")
@@ -201,7 +201,7 @@ with tabs[4]:
     fig_radar = px.line_polar(r=[rep_data['Calls_Dialed'], rep_data['Call_Time_Mins'], rep_data['Deals_Closed']], 
                               theta=['Calls', 'TalkTime', 'Deals'], line_close=True)
     fig_radar.update_traces(fill='toself')
-    st.plotly_chart(fig_radar, use_container_width=True,key="home_1")
+    st.plotly_chart(fig_radar, use_container_width=True)
     
     # 3. Waterfall Chart (Revenue Contribution)
     st.subheader("Revenue Contribution Waterfall")
@@ -212,20 +212,20 @@ with tabs[4]:
         y=[0, data['Qualified'].sum(), data['Converted'].sum(), data['Total_Revenue'].sum()],
         connector={"line": {"color": "rgb(63, 63, 63)"}},
     ))
-    st.plotly_chart(fig_water, use_container_width=True,key="home_1")
+    st.plotly_chart(fig_water, use_container_width=True)
     
     # 4. Cohort Chart (Group by Region/Manager)
     st.subheader("Cohort Analysis: Revenue by Region")
     cohort_data = data.groupby('Region')['Total_Revenue'].sum().reset_index()
     fig_cohort = px.bar(cohort_data, x='Region', y='Total_Revenue', color='Region', title="Revenue by Region Cohort")
-    st.plotly_chart(fig_cohort, use_container_width=True,key="home_1")
+    st.plotly_chart(fig_cohort, use_container_width=True)
     
     # 5. Stacked Area Chart (Cumulative Revenue)
     st.subheader("Cumulative Revenue Contribution")
     # Sorting by revenue to make the area chart look clean
     area_data = data.sort_values('Total_Revenue').reset_index()
     fig_area = px.area(area_data, x=area_data.index, y='Total_Revenue', color='Region', title="Cumulative Revenue by Region")
-    st.plotly_chart(fig_area, use_container_width=True,key="home_1")
+    st.plotly_chart(fig_area, use_container_width=True)
     X = data[['Calls_Dialed', 'Call_Time_Mins', 'Converted']]
     y = data['Total_Revenue']
     model = DecisionTreeRegressor().fit(X, y)
