@@ -24,47 +24,51 @@ if selected_region != 'All':
 # --- TABS ---
 tabs = st.tabs(["🏠 Home", "📊 Descriptive", "🔍 Diagnostic", "🎯 Perspective", "🔮 Predictive"])
 
-# 1. HOME PAGE
-
-# 1. HOME PAGE
-# 1. HOME PAGE
-# 1. HOME PAGE
+# 1. HOME
 with tabs[0]:
-    st.title("Executive Summary")
-    c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric("Dialed", data['Calls_Dialed'].sum())
-    c2.metric("Qualified", data['Qualified'].sum())
-    c3.metric("Avg Talk", f"{data['Call_Time_Mins'].mean():.1f}m")
-    c4.metric("Deals", data['Deals_Closed'].sum())
-    c5.metric("Revenue", f"₹{data['Total_Revenue'].sum():,.0f}")
-    
-    col1, col2 = st.columns(2)
+    st.header("Home Dashboard")
 
-    # --- MANAGER PERFORMANCE CHART: Connected Calls vs Deals Closed ---
-    mgr_perf_home = data.groupby('Sales_Manager_Name')[['Converted','Deals_Closed']].sum().reset_index()
-    fig_mgr_bar = px.bar(
-        mgr_perf_home, 
-        x='Sales_Manager_Name', 
-        y=['Converted','Deals_Closed'], 
-        barmode='group',
-        title="Manager Performance: Connected Calls vs Deals Closed"
+    # --- Summary Metrics ---
+    st.subheader("Key Metrics Overview")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Total Calls Dialed", f"{data['Calls_Dialed'].sum():,}")
+    col2.metric("Total Deals Closed", f"{data['Deals_Closed'].sum():,}")
+    col3.metric("Total Revenue", f"₹{data['Total_Revenue'].sum():,}")
+    col4.metric("Average Talk Time (mins)", f"{data['Call_Time_Mins'].mean():.1f}")
+
+    # --- Lead Buckets Pie Chart across Regions ---
+    st.subheader("Lead Buckets Distribution")
+    lead_buckets = data.groupby('Region')[['New_Leads','Followup_Leads','Qualified','Disqualified']].sum().reset_index()
+
+    lead_long = lead_buckets.melt(
+        id_vars=['Region'],
+        value_vars=['New_Leads','Followup_Leads','Qualified','Disqualified'],
+        var_name='Lead_Type',
+        value_name='Count'
     )
-    col1.plotly_chart(fig_mgr_bar, use_container_width=True, key="home_mgr_bar_chart")
 
-    # --- LINE CHART: Revenue by Manager with Average Benchmark ---
-    mgr_rev = data.groupby('Sales_Manager_Name')['Total_Revenue'].sum().reset_index()
-    avg_rev = mgr_rev['Total_Revenue'].mean()
-    fig_line = px.line(mgr_rev, x='Sales_Manager_Name', y='Total_Revenue', 
-                       markers=True, title="Revenue by Manager with Team Average")
-    fig_line.add_hline(y=avg_rev, line_dash="dot", line_color="red", annotation_text="Average Revenue")
-    col2.plotly_chart(fig_line, use_container_width=True, key="home_mgr_line_chart")
+    # Overall distribution pie chart
+    fig_lead_pie = px.pie(
+        lead_long,
+        values='Count',
+        names='Lead_Type',
+        color='Lead_Type',
+        title="Overall Lead Buckets Distribution (All Regions)",
+        hole=0.3
+    )
+    st.plotly_chart(fig_lead_pie, use_container_width=True, key="home_lead_pie")
 
-    # --- PIE CHART: Revenue by Region ---
-    st.subheader("Revenue Performance by Region")
-    revenue_region = data.groupby('Region')['Total_Revenue'].sum().reset_index()
-    fig_pie = px.pie(revenue_region, values='Total_Revenue', names='Region',
-                     title="Revenue Distribution Across Regions", hole=0.3)
-    st.plotly_chart(fig_pie, use_container_width=True, key="home_pie_chart")
+    # --- Stacked Bar Chart: Lead Buckets by Region ---
+    st.subheader("Lead Buckets by Region")
+    fig_lead_bar = px.bar(
+        lead_long,
+        x='Region',
+        y='Count',
+        color='Lead_Type',
+        barmode='stack',
+        title="Lead Buckets Composition by Region"
+    )
+    st.plotly_chart(fig_lead_bar, use_container_width=True, key="home_lead_bar")
 
 
 
