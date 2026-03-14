@@ -143,6 +143,32 @@ with tabs[0]:
 with tabs[1]:
     st.header("Descriptive Analysis")
 
+    # --- Stacked Column Chart: Call Outcomes ---
+    st.subheader("Call Outcomes by Senior Manager")
+    # Aggregate outcomes by manager
+    outcomes = data.groupby('Senior_Manager')[['Calls_Dialed','Disqualified','No_Answer','Qualified','Converted']].sum().reset_index()
+
+    # Melt into long format for stacked column chart
+    outcomes_long = outcomes.melt(
+        id_vars=['Senior_Manager'],
+        value_vars=['Disqualified','No_Answer','Qualified','Converted'],
+        var_name='Outcome',
+        value_name='Count'
+    )
+
+    fig_outcomes = px.bar(
+        outcomes_long,
+        x='Senior_Manager',
+        y='Count',
+        color='Outcome',
+        barmode='stack',
+        title="Dialed Calls Broken into Outcomes"
+    )
+    st.plotly_chart(fig_outcomes, use_container_width=True, key="desc_call_outcomes")
+
+
+
+
     # --- Donut Chart: Call Outcomes (Connected vs Not Connected) ---
     st.subheader("Call Outcomes by Manager")
     call_outcomes = data.groupby('Sales_Manager_Name')[['Calls_Dialed','Converted']].sum().reset_index()
@@ -163,31 +189,7 @@ with tabs[1]:
     )
     st.plotly_chart(fig_donut, use_container_width=True, key="desc_outcomes_donut")
 
-    # --- Grouped Bar Chart: Deals Closed by Region ---
-    st.subheader("Deals Closed by Manager across Regions")
-    deals_group = data.groupby(['Sales_Manager_Name','Region'])['Deals_Closed'].sum().reset_index()
-    fig_grouped = px.bar(
-        deals_group,
-        x='Sales_Manager_Name',
-        y='Deals_Closed',
-        color='Region',
-        barmode='group',
-        title="Deals Closed by Manager across Regions"
-    )
-    st.plotly_chart(fig_grouped, use_container_width=True, key="desc_deals_grouped")
 
-    # --- Revenue Contribution: Region → Manager ---
-    st.subheader("Revenue Contribution by Region and Manager")
-    revenue_group = data.groupby(['Region','Sales_Manager_Name'])['Total_Revenue'].sum().reset_index()
-    fig_revenue = px.bar(
-        revenue_group,
-        x='Sales_Manager_Name',
-        y='Total_Revenue',
-        color='Region',
-        barmode='stack',
-        title="Revenue Contribution by Manager across Regions"
-    )
-    st.plotly_chart(fig_revenue, use_container_width=True, key="desc_revenue_bar")
 
     # --- Line Chart: Talk Time Distribution by Manager ---
     st.subheader("Average Talk Time by Manager")
@@ -208,18 +210,7 @@ with tabs[1]:
     )
     st.plotly_chart(fig_line, use_container_width=True, key="desc_talktime_line")
 
-    # --- Bubble Chart: Talk Time vs Revenue ---
-    st.subheader("Talk Time vs Revenue (Bubble Size = Deals Closed)")
-    fig_bubble = px.scatter(
-        data,
-        x='Call_Time_Mins',
-        y='Total_Revenue',
-        size='Deals_Closed',
-        color='Sales_Manager_Name',
-        hover_name='Sales_Manager_Name',
-        title="Talk Time vs Revenue by Manager"
-    )
-    st.plotly_chart(fig_bubble, use_container_width=True, key="desc_talktime_bubble")
+
 
     # --- Lead Funnel Chart across Regions ---
     st.subheader("Lead Funnel by Region")
