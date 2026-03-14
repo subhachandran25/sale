@@ -118,27 +118,30 @@ with tabs[1]:
     )
     st.plotly_chart(fig_grouped, use_container_width=True, key="desc_grouped_chart")
 
-    # --- Treemap: Revenue Contribution ---
-    st.subheader("Revenue Contribution Treemap")
-    treemap_data = data.groupby(['Region','Sales_Manager_Name','Sales_Rep_Name'])['Total_Revenue'].sum().reset_index()
-    fig_treemap = px.treemap(
-        treemap_data,
+    # --- Sunburst Chart: Revenue Contribution (better than Treemap) ---
+    st.subheader("Revenue Contribution Sunburst")
+    sunburst_data = data.groupby(['Region','Sales_Manager_Name','Sales_Rep_Name'])['Total_Revenue'].sum().reset_index()
+    fig_sunburst = px.sunburst(
+        sunburst_data,
         path=['Region','Sales_Manager_Name','Sales_Rep_Name'],
         values='Total_Revenue',
-        title="Revenue Contribution by Rep → Manager → Region"
+        color='Region',
+        title="Revenue Contribution by Region → Manager → Rep"
     )
-    st.plotly_chart(fig_treemap, use_container_width=True, key="desc_treemap_chart")
+    st.plotly_chart(fig_sunburst, use_container_width=True, key="desc_sunburst_chart")
 
-    # --- Box Plot: Talk Time Distribution by Manager ---
+    # --- Violin Plot: Talk Time Distribution by Manager ---
     st.subheader("Talk Time Distribution by Manager")
-    fig_box = px.box(
+    fig_violin = px.violin(
         data,
         x='Sales_Manager_Name',
         y='Call_Time_Mins',
+        box=True,       # show box inside violin
+        points="all",   # show all points
         color='Sales_Manager_Name',
-        title="Talk Time Spread and Outliers"
+        title="Talk Time Spread and Density by Manager"
     )
-    st.plotly_chart(fig_box, use_container_width=True, key="desc_box_chart")
+    st.plotly_chart(fig_violin, use_container_width=True, key="desc_violin_chart")
 
     # --- Bubble Chart: Talk Time vs Revenue ---
     st.subheader("Talk Time vs Revenue (Bubble Size = Deals Closed)")
@@ -156,7 +159,6 @@ with tabs[1]:
     # --- Summary Metrics Table ---
     st.subheader("Summary Metrics Table")
     st.dataframe(data.describe(), use_container_width=True)
-
 
 
 # 3. DIAGNOSTIC
