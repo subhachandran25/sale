@@ -35,17 +35,19 @@ with tabs[0]:
     col3.metric("Total Revenue", f"₹{data['Total_Revenue'].sum():,}")
     col4.metric("Average Talk Time (mins)", f"{data['Call_Time_Mins'].mean():.1f}")
 
-    # --- Call Outcomes: Connected vs Dialed ---
-    st.subheader("Call Outcomes Comparison")
-    call_outcomes = data.groupby('Sales_Manager_Name')[['Calls_Dialed','Converted']].sum().reset_index()
-    fig_outcomes = px.bar(
-        call_outcomes,
-        x='Sales_Manager_Name',
-        y=['Calls_Dialed','Converted'],
-        barmode='group',
-        title="Connected Calls vs Dialed Calls by Manager"
-    )
-    st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_chart")
+   # --- Call Outcomes Comparison: Connected vs Converted ---
+st.subheader("Call Outcomes Comparison")
+call_outcomes = data.groupby('Sales_Manager_Name')[['Converted','Deals_Closed']].sum().reset_index()
+
+fig_outcomes = px.bar(
+    call_outcomes,
+    x='Sales_Manager_Name',
+    y=['Converted','Deals_Closed'],
+    barmode='group',
+    title="Connected Calls vs Converted Leads by Manager"
+)
+st.plotly_chart(fig_outcomes, use_container_width=True, key="home_outcomes_connected_vs_converted")
+
 
     # --- Deals Closed by Region ---
     st.subheader("Deals Closed by Manager across Regions")
